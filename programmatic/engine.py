@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import unicodedata
-from dataclasses import asdict
-
 from communicative.closure import can_close_for_judgement
 from communicative.khabar_insha import classify_mode
 from composition.asnadi import evaluate_asnadi
@@ -111,5 +109,5 @@ class TransitionEngine:
             "confidence": 1.0,
             "explanation": "All required compositional and communicative closures passed.",
         }
-        self._append_trace(Rank.JUDGEMENT, Decision.COMPLETE, "Judgement completed.", {"judgement": asdict(self.state).get("judgement")})
+        self._append_trace(Rank.JUDGEMENT, Decision.COMPLETE, "Judgement completed.", {"judgement": self.state.judgement})
         return self.state, self.trace
