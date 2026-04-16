@@ -15,3 +15,7 @@ invariants:
       - communicative_closed
       - ambiguity_resolved_or_suspended
       - trace_chain_valid
+  - id: NJ-003
+    name: required_constitutional_events_must_be_ordered
+    forbidden_if_missing:
+      - ordered_required_trace_events

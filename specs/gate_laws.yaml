@@ -17,3 +17,8 @@ laws:
       - communicative_closed
       - ambiguity_resolved_or_suspended
       - trace_chain_valid
+  - id: GL-003
+    name: composition_requires_minimum_role_tokens
+    when: composition
+    requires:
+      - role_distribution_min_tokens_2
