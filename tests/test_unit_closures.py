@@ -11,6 +11,7 @@ from core.model import ProofState
 from core.singular.conceptual_closure import apply_singular_conceptual_closure
 from core.singular.informational_closure import apply_singular_informational_closure
 from core.singular.perceptual_closure import apply_singular_perceptual_closure
+from core.weight.mizan_closure import apply_mizan_closure
 
 
 class UnitClosureTests(unittest.TestCase):
@@ -31,6 +32,17 @@ class UnitClosureTests(unittest.TestCase):
         self.assertTrue(state.singular_perceptual_closed)
         self.assertTrue(state.singular_informational_closed)
         self.assertTrue(state.singular_conceptual_closed)
+
+    def test_singular_perceptual_uses_ingress_when_not_normalized(self) -> None:
+        state = ProofState(ingress_text="النص")
+        apply_singular_perceptual_closure(state)
+        self.assertTrue(state.singular_perceptual_closed)
+
+    def test_mizan_empty_text_not_closed(self) -> None:
+        state = ProofState(ingress_text="")
+        apply_mizan_closure(state)
+        self.assertFalse(state.weight_closed)
+        self.assertIsNone(state.weight_label)
 
 
 if __name__ == "__main__":

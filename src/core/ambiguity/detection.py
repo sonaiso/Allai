@@ -5,7 +5,7 @@ _AMBIGUOUS_MARKERS = {"/", "?", "or"}
 
 
 def detect_ambiguity(state: ProofState) -> ProofState:
-    text = state.normalized_text.lower()
+    text = state.effective_text().lower()
     candidates = []
     for marker in _AMBIGUOUS_MARKERS:
         if marker in text:

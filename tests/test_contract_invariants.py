@@ -22,6 +22,16 @@ class ContractInvariantTests(unittest.TestCase):
         with self.assertRaises(GateViolationError):
             transition_proposition_to_judgement(state)
 
+    def test_composition_rejected_when_role_tokens_insufficient(self) -> None:
+        state = ProofState(ingress_text="x")
+        state.normalized_text = "token"
+        state.singular_perceptual_closed = True
+        state.singular_informational_closed = True
+        state.singular_conceptual_closed = True
+        state.weight_closed = True
+        with self.assertRaises(GateViolationError):
+            apply_role_distribution_composition(state)
+
 
 if __name__ == "__main__":
     unittest.main()
