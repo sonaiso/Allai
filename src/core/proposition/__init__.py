@@ -1,0 +1,1 @@
+"""Proposition closure stage."""
