@@ -1,0 +1,1 @@
+"""Communicative closure stage."""

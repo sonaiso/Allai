@@ -1,0 +1,19 @@
+version: 1
+scope: proof_mvp_v1
+laws:
+  - id: GL-001
+    name: composition_requires_singular_and_weight
+    when: composition
+    requires:
+      - singular_perceptual_closed
+      - singular_informational_closed
+      - singular_conceptual_closed
+      - weight_closed
+  - id: GL-002
+    name: judgement_requires_proposition_communication_ambiguity_trace
+    when: judgement
+    requires:
+      - proposition_closed
+      - communicative_closed
+      - ambiguity_resolved_or_suspended
+      - trace_chain_valid

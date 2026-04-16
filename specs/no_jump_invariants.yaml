@@ -1,0 +1,17 @@
+version: 1
+scope: proof_mvp_v1
+invariants:
+  - id: NJ-001
+    name: no_composition_before_singular_and_weight
+    forbidden_if_missing:
+      - singular_perceptual_closed
+      - singular_informational_closed
+      - singular_conceptual_closed
+      - weight_closed
+  - id: NJ-002
+    name: no_judgement_before_proposition_and_communication
+    forbidden_if_missing:
+      - proposition_closed
+      - communicative_closed
+      - ambiguity_resolved_or_suspended
+      - trace_chain_valid
