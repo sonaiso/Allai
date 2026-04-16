@@ -1,0 +1,35 @@
+{
+  "version": "v1",
+  "items": [
+    {
+      "id": "constitution_required_modules",
+      "code_modules": [
+        "composition/perception.py",
+        "composition/information.py",
+        "composition/concept.py",
+        "composition/roles.py",
+        "composition/asnadi.py",
+        "composition/tadmini.py",
+        "composition/taqyidi.py",
+        "composition/factors.py",
+        "composition/case_effects.py",
+        "communicative/khabar_insha.py",
+        "communicative/closure.py"
+      ],
+      "tests": ["tests/test_verification_matrix.py"],
+      "evidence_artifacts": ["docs/compositional_rationality_and_role_mizan_constitution_v1.md"]
+    },
+    {
+      "id": "gate_decisions_and_trace",
+      "code_modules": ["formal/model.py", "programmatic/engine.py", "programmatic/replay.py"],
+      "tests": ["tests/test_engine.py", "tests/test_e2e.py"],
+      "evidence_artifacts": ["docs/verification_matrix_v1.json"]
+    },
+    {
+      "id": "scenario_reproducibility",
+      "code_modules": ["experimental/scenarios.py", "e2e/pipeline.py"],
+      "tests": ["tests/test_scenarios.py"],
+      "evidence_artifacts": ["Makefile"]
+    }
+  ]
+}
