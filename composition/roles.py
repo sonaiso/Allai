@@ -16,11 +16,12 @@ def assign_roles(state: ProofState) -> tuple[Decision, str, dict]:
             {"deferred_patterns": sorted(DEFERRED_WAZN_PATTERNS)},
         )
 
+    has_causal_connector = "لأن" in state.tokens or "لأن" in (state.normalized_unicode or "")
     state.roles = {
         "fa_iliya": state.tokens[0],
         "maf_uliya": state.tokens[1],
-        "sababiya": state.tokens[0] if "لأن" in state.tokens else None,
-        "musabbabiya": state.tokens[-1] if "لأن" in state.tokens else None,
+        "sababiya": state.tokens[0] if has_causal_connector else None,
+        "musabbabiya": state.tokens[-1] if has_causal_connector else None,
     }
     return (
         Decision.PASS,
