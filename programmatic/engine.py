@@ -49,11 +49,11 @@ class TransitionEngine:
         self._previous_rank = rank
 
     def _unicode_ingress(self, text: str) -> tuple[Decision, str, dict]:
-        normalized = unicodedata.normalize("NFC", text).strip()
+        normalized = unicodedata.normalize("NFKC", text).strip()
         self.state.original_unicode = text
         self.state.normalized_unicode = normalized
         self.state.tokens = [t for t in normalized.split() if t]
-        return Decision.PASS, "Unicode ingress complete.", {"normalization": "NFC+strip", "tokens": self.state.tokens}
+        return Decision.PASS, "Unicode ingress complete.", {"normalization": "NFKC+strip", "tokens": self.state.tokens}
 
     def _admissibility(self) -> tuple[Decision, str, dict]:
         text = self.state.normalized_unicode or ""

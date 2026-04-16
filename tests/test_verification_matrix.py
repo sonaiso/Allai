@@ -1,4 +1,5 @@
 import json
+from importlib import import_module
 from pathlib import Path
 
 
@@ -16,3 +17,9 @@ def test_verification_matrix_paths_exist_and_are_objective():
             assert item[key], f"{item['id']} missing {key}"
             for rel_path in item[key]:
                 assert (repo / rel_path).exists(), f"{item['id']} missing referenced path: {rel_path}"
+
+        for rel_path in item["code_modules"]:
+            if not rel_path.endswith(".py"):
+                continue
+            module_name = rel_path.replace("/", ".").removesuffix(".py")
+            import_module(module_name)

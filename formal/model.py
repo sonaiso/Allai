@@ -47,6 +47,16 @@ RANK_ORDER = [
 
 @dataclass(frozen=True)
 class RankContract:
+    """Formal gate contract.
+
+    F: rank identifier.
+    x: evaluated element identifier.
+    C_F: membership flag in {0,1}.
+    M_F: completion measure in [0,1].
+    B_F: blocker flag in {0,1}.
+    theta_F: threshold in [0,1].
+    """
+
     F: Rank
     x: str
     C_F: int

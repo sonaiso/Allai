@@ -1,6 +1,6 @@
 from formal.model import Decision, ProofState
 
-
+# v1 boundaries: minimal repeatable patterns supported; deeper constructions deferred.
 SUPPORTED_WAZN_PATTERNS = {"simple_clause", "idafa_like"}
 DEFERRED_WAZN_PATTERNS = {"poetic_inversion", "deep_ellipsis"}
 
