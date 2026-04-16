@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+import unicodedata
 
 
 @dataclass
@@ -31,6 +32,11 @@ class ProofState:
     judgement: Optional[str] = None
 
     trace_chain: List[Dict[str, Any]] = field(default_factory=list)
+
+    def effective_text(self) -> str:
+        if self.normalized_text:
+            return self.normalized_text
+        return unicodedata.normalize("NFKC", self.ingress_text or "")
 
     def add_trace(self, event: str, payload: Optional[Dict[str, Any]] = None) -> None:
         payload = payload or {}

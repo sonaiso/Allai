@@ -12,7 +12,7 @@ def _contains_forbidden_controls(text: str) -> bool:
 
 
 def apply_admissibility_pre_u0(state: ProofState) -> ProofState:
-    text = state.normalized_text
+    text = state.effective_text()
     state.admissible = bool(text.strip()) and not _contains_forbidden_controls(text)
     state.add_trace("admissibility_checked", {"admissible": state.admissible})
     return state

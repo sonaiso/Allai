@@ -1,7 +1,7 @@
 from core.model import ProofState
 
 
-_REQUIRED_EVENTS_FOR_JUDGEMENT = {
+_REQUIRED_EVENTS_FOR_JUDGEMENT = [
     "unicode_ingress",
     "admissibility_checked",
     "singular_perceptual_closure",
@@ -14,7 +14,7 @@ _REQUIRED_EVENTS_FOR_JUDGEMENT = {
     "ambiguity_outcome",
     "communicative_closure",
     "proposition_closure",
-}
+]
 
 
 def validate_trace_chain(state: ProofState) -> bool:
@@ -25,5 +25,14 @@ def validate_trace_chain(state: ProofState) -> bool:
     if ids != list(range(1, len(ids) + 1)):
         return False
 
-    events = {item["event"] for item in state.trace_chain}
-    return _REQUIRED_EVENTS_FOR_JUDGEMENT.issubset(events)
+    event_positions = {}
+    for index, item in enumerate(state.trace_chain):
+        event = item.get("event")
+        if event not in event_positions:
+            event_positions[event] = index
+
+    if not all(event in event_positions for event in _REQUIRED_EVENTS_FOR_JUDGEMENT):
+        return False
+
+    positions = [event_positions[event] for event in _REQUIRED_EVENTS_FOR_JUDGEMENT]
+    return positions == sorted(positions)

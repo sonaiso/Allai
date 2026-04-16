@@ -18,7 +18,8 @@ def require_for_composition(state: ProofState) -> None:
 
 def require_for_judgement(state: ProofState, trace_chain_valid: bool) -> None:
     ambiguity_ok = state.ambiguity_outcome in {"resolved", "suspended"} and bool(state.ambiguity_reason)
-    if not (state.proposition_closed and state.communicative_closed and ambiguity_ok and trace_chain_valid):
+    proposition_integrity_ok = state.proposition_closed and bool(state.composition)
+    if not (proposition_integrity_ok and state.communicative_closed and ambiguity_ok and trace_chain_valid):
         state.add_trace(
             "judgement_rejected",
             {
