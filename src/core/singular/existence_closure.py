@@ -19,5 +19,8 @@ def apply_singular_existence_closure(state: ProofState) -> ProofState:
     state.singular_existence_closed = closed
     state.singular_level_evidence["existence"] = evidence
     state.singular_level_blockers["existence"] = blocker
+    state.singular_rank_states["existence"] = closed
+    state.singular_rank_sublayers["existence"] = evidence
+    state.singular_rank_blockers["existence"] = blocker
     state.add_trace("singular_existence_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state

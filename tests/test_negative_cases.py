@@ -46,6 +46,8 @@ class NegativeCaseTests(unittest.TestCase):
             "singular_relational_closure",
             "mizan_closure",
             "singular_weight_handoff_closure",
+            "singular_logical_classificatory_closure",
+            "singular_unified_closure",
             "singular_closure_record_assembled",
             "composition_applied",
             "ambiguity_detected",

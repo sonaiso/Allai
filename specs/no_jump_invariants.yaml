@@ -2,7 +2,7 @@ version: 1
 scope: proof_mvp_v1
 invariants:
   - id: NJ-001
-    name: no_composition_before_complete_singular_closure_record
+    name: no_composition_before_complete_unified_singular_closure_record
     forbidden_if_missing:
       - closure_record_exists
       - ready_for_composition
@@ -18,10 +18,12 @@ invariants:
     forbidden_if_missing:
       - ordered_required_trace_events
   - id: NJ-004
-    name: no_jump_between_singular_levels
+    name: no_jump_between_singular_ranks
     forbidden_if_missing:
       - adjacency_existence_to_designation
       - adjacency_designation_to_possibility
       - adjacency_possibility_to_identity
       - adjacency_identity_to_relational
       - adjacency_relational_to_weight
+      - adjacency_weight_to_logical_classificatory
+      - adjacency_logical_classificatory_to_unified_closure

@@ -19,7 +19,9 @@ from core.singular.closure_contracts import enforce_singular_closure
 from core.singular.closure_record import assemble_singular_closure_record
 from core.singular.conceptual_closure import apply_singular_conceptual_closure
 from core.singular.informational_closure import apply_singular_informational_closure
+from core.singular.logical_classificatory_closure import apply_singular_logical_classificatory_closure
 from core.singular.perceptual_closure import apply_singular_perceptual_closure
+from core.singular.unified_closure import apply_singular_unified_closure
 from core.singular.weight_handoff_closure import apply_singular_weight_handoff_closure
 from core.trace.replay_engine import replay_digest
 from core.trace.singular_trace import emit_singular_trace
@@ -43,6 +45,8 @@ class EndToEndProofTests(unittest.TestCase):
         legal = verify_weight_legality(state)
         determine_derivational_eligibility(state, legal)
         apply_singular_weight_handoff_closure(state)
+        apply_singular_logical_classificatory_closure(state)
+        apply_singular_unified_closure(state)
         assemble_singular_closure_record(state)
         enforce_singular_closure(state)
         emit_singular_trace(state)

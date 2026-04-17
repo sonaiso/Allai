@@ -19,6 +19,9 @@ def apply_singular_identity_closure(state: ProofState) -> ProofState:
         state.singular_identity_closed = False
         state.singular_level_evidence["identity"] = {}
         state.singular_level_blockers["identity"] = blocker
+        state.singular_rank_states["identity"] = False
+        state.singular_rank_sublayers["identity"] = {}
+        state.singular_rank_blockers["identity"] = blocker
         state.add_trace("singular_identity_closure", {"closed": False, "blocker": blocker})
         return state
 
@@ -39,5 +42,8 @@ def apply_singular_identity_closure(state: ProofState) -> ProofState:
     state.singular_identity_closed = closed
     state.singular_level_evidence["identity"] = evidence
     state.singular_level_blockers["identity"] = blocker
+    state.singular_rank_states["identity"] = closed
+    state.singular_rank_sublayers["identity"] = evidence
+    state.singular_rank_blockers["identity"] = blocker
     state.add_trace("singular_identity_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state

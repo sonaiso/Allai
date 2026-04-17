@@ -21,9 +21,17 @@ class ProofState:
     singular_identity_closed: bool = False
     singular_relational_closed: bool = False
     singular_weight_closed: bool = False
+    singular_logical_classificatory_closed: bool = False
+    singular_unified_closure_closed: bool = False
 
     singular_level_evidence: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     singular_level_blockers: Dict[str, Optional[str]] = field(default_factory=dict)
+
+    singular_rank_states: Dict[str, bool] = field(default_factory=dict)
+    singular_rank_sublayers: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    singular_rank_blockers: Dict[str, Optional[str]] = field(default_factory=dict)
+    singular_final_decision: Optional[str] = None
+    singular_final_decision_reason: Optional[str] = None
 
     closure_record_id: Optional[str] = None
     existence_closed: bool = False

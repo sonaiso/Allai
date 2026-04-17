@@ -7,6 +7,9 @@ def apply_singular_weight_handoff_closure(state: ProofState) -> ProofState:
         state.singular_weight_closed = False
         state.singular_level_evidence["weight"] = {}
         state.singular_level_blockers["weight"] = blocker
+        state.singular_rank_states["weight"] = False
+        state.singular_rank_sublayers["weight"] = {}
+        state.singular_rank_blockers["weight"] = blocker
         state.add_trace("singular_weight_handoff_closure", {"closed": False, "blocker": blocker})
         return state
 
@@ -22,5 +25,8 @@ def apply_singular_weight_handoff_closure(state: ProofState) -> ProofState:
     state.singular_weight_closed = closed
     state.singular_level_evidence["weight"] = evidence
     state.singular_level_blockers["weight"] = blocker
+    state.singular_rank_states["weight"] = closed
+    state.singular_rank_sublayers["weight"] = evidence
+    state.singular_rank_blockers["weight"] = blocker
     state.add_trace("singular_weight_handoff_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state
