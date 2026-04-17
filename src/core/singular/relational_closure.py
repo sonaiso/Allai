@@ -14,9 +14,14 @@ def apply_singular_relational_closure(state: ProofState) -> ProofState:
         return state
 
     identity = state.singular_level_evidence.get("identity", {})
-    word_class = identity.get("word_class")
+    identity_higher = identity.get("higher_analysis", {})
+    word_class = identity_higher.get("word_class")
 
-    evidence = {
+    minimum_conditions = {
+        "accepts_relation": word_class in {"noun", "verb", "particle"},
+        "has_primary_relation_type": word_class in {"noun", "verb", "particle"},
+    }
+    higher_analysis = {
         "can_be_agent": word_class == "noun",
         "can_be_patient": word_class == "noun",
         "can_be_cause": word_class in {"noun", "verb"},
@@ -24,12 +29,11 @@ def apply_singular_relational_closure(state: ProofState) -> ProofState:
         "can_be_linker": word_class == "particle",
         "can_take_predication": word_class in {"noun", "verb"},
     }
-    closed = evidence["can_take_predication"] and (
-        evidence["can_be_agent"]
-        or evidence["can_be_patient"]
-        or evidence["can_be_linker"]
-        or evidence["can_be_effect"]
-    )
+    evidence = {
+        "minimum_conditions": minimum_conditions,
+        "higher_analysis": higher_analysis,
+    }
+    closed = all(minimum_conditions.values())
     blocker = None if closed else "relational_capacity_unresolved"
 
     state.singular_relational_closed = closed

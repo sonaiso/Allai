@@ -1,5 +1,7 @@
 version: 1
 scope: proof_mvp_v1
+policy:
+  no_jump_scope: mandatory_transition_ranks_only
 invariants:
   - id: NJ-001
     name: no_composition_before_complete_unified_singular_closure_record

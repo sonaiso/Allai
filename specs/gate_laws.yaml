@@ -1,5 +1,8 @@
 version: 1
 scope: proof_mvp_v1
+policy:
+  mandatory_gates: minimum_transition_conditions_only
+  deferred_layers_default: non_blocking
 laws:
   - id: GL-001
     name: composition_requires_complete_unified_singular_closure_record
@@ -15,6 +18,8 @@ laws:
       - logical_classificatory_closed
       - unified_closure_closed
       - ready_for_composition
+    optional_non_gating:
+      - singular_deferred_analysis_available
   - id: GL-002
     name: judgement_requires_proposition_communication_ambiguity_trace
     when: judgement

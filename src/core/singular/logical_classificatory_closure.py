@@ -16,18 +16,27 @@ def apply_singular_logical_classificatory_closure(state: ProofState) -> ProofSta
     tokens = [t for t in state.effective_text().split() if t]
     first = tokens[0] if tokens else ""
     identity = state.singular_level_evidence.get("identity", {})
+    identity_higher = identity.get("higher_analysis", {})
 
-    evidence = {
+    minimum_conditions = {
+        "independent_meaning": bool(tokens),
+        "source_transform_relation": bool(state.weight_label),
+    }
+    higher_analysis = {
         "independent_meaning": bool(tokens),
         "universality_particularity": bool(tokens),
-        "genus_species": bool(identity.get("word_class")),
+        "genus_species": bool(identity_higher.get("word_class")),
         "essence": bool(first),
         "literal_figurative": True,
         "linguistic_customary_transferred": True,
         "dalala_type": True,
         "source_transform_relation": bool(state.weight_label),
     }
-    closed = all(evidence.values())
+    evidence = {
+        "minimum_conditions": minimum_conditions,
+        "higher_analysis": higher_analysis,
+    }
+    closed = all(minimum_conditions.values())
     blocker = None if closed else "logical_classificatory_incomplete"
 
     state.singular_logical_classificatory_closed = closed

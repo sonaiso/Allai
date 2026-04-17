@@ -44,11 +44,17 @@ def apply_singular_unified_closure(state: ProofState) -> ProofState:
 
     state.singular_rank_states.update(rank_states)
     state.singular_rank_sublayers["unified_closure"] = {
-        "rank_states": rank_states,
-        "blockers": blockers,
-        "decision": decision,
-        "reason": reason,
-        "ready_for_composition": closed,
+        "minimum_conditions": {
+            "all_required_ranks_closed": all(rank_states.values()),
+            "no_rank_blockers": len(blockers) == 0,
+        },
+        "higher_analysis": {
+            "rank_states": rank_states,
+            "blockers": blockers,
+            "decision": decision,
+            "reason": reason,
+            "ready_for_composition": closed,
+        },
     }
     state.singular_rank_blockers["unified_closure"] = None if closed else "unified_closure_incomplete"
 

@@ -63,6 +63,15 @@ class NegativeCaseTests(unittest.TestCase):
         self.assertFalse(validate_trace_chain(state))
         self.assertEqual(state.trace_chain[-1]["event"], "trace_chain_rejected")
 
+    def test_trace_validation_rejects_when_required_events_missing(self) -> None:
+        state = ProofState(ingress_text="x")
+        state.trace_chain = [
+            {"event_id": 1, "event": "unicode_ingress", "payload": {}, "timestamp": "2026-01-01T00:00:00+00:00"},
+            {"event_id": 2, "event": "admissibility_checked", "payload": {}, "timestamp": "2026-01-01T00:00:00+00:00"},
+        ]
+        self.assertFalse(validate_trace_chain(state))
+        self.assertEqual(state.trace_chain[-1]["event"], "trace_chain_rejected")
+
 
 if __name__ == "__main__":
     unittest.main()
