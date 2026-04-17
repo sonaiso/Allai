@@ -2,6 +2,14 @@
 
 Proof-Oriented MVP v1 scaffold implementing constitutional closure gates.
 
+## PostgreSQL schema and seed
+
+```bash
+cd /home/runner/work/Allai/Allai
+psql "$DATABASE_URL" -f /home/runner/work/Allai/Allai/db/schema/sql/001_atomic_arabic_schema.sql
+psql "$DATABASE_URL" -f /home/runner/work/Allai/Allai/db/seed/sql/001_atomic_arabic_seed.sql
+```
+
 ## Run tests
 
 ```bash
