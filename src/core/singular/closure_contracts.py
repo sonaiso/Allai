@@ -6,12 +6,20 @@ class SingularClosureError(ValueError):
 
 
 def enforce_singular_closure(state: ProofState) -> None:
-    if not (
-        state.singular_perceptual_closed
-        and state.singular_informational_closed
-        and state.singular_conceptual_closed
-    ):
-        state.add_trace("singular_contract_rejected", {"reason": "incomplete_singular_closure"})
-        raise SingularClosureError("Singular closure contracts are not satisfied.")
+    if not state.ready_for_composition:
+        state.add_trace(
+            "singular_contract_rejected",
+            {
+                "reason": "incomplete_singular_closure_record",
+                "closure_record_id": state.closure_record_id,
+            },
+        )
+        raise SingularClosureError("Singular closure record is not complete.")
 
-    state.add_trace("singular_contract_satisfied", {})
+    state.add_trace(
+        "singular_contract_satisfied",
+        {
+            "closure_record_id": state.closure_record_id,
+            "ready_for_composition": state.ready_for_composition,
+        },
+    )

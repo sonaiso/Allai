@@ -9,6 +9,7 @@ from core.composition.role_distribution import apply_role_distribution_compositi
 from core.gates.validator import GateViolationError
 from core.judgement.proposition_to_judgement import transition_proposition_to_judgement
 from core.model import ProofState
+from core.singular.closure_record import assemble_singular_closure_record
 
 
 class ContractInvariantTests(unittest.TestCase):
@@ -25,10 +26,13 @@ class ContractInvariantTests(unittest.TestCase):
     def test_composition_rejected_when_role_tokens_insufficient(self) -> None:
         state = ProofState(ingress_text="x")
         state.normalized_text = "token"
-        state.singular_perceptual_closed = True
-        state.singular_informational_closed = True
-        state.singular_conceptual_closed = True
-        state.weight_closed = True
+        state.singular_existence_closed = True
+        state.singular_designation_closed = True
+        state.singular_possibility_closed = True
+        state.singular_identity_closed = True
+        state.singular_relational_closed = True
+        state.singular_weight_closed = True
+        assemble_singular_closure_record(state)
         with self.assertRaises(GateViolationError):
             apply_role_distribution_composition(state)
 

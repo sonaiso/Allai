@@ -16,9 +16,11 @@ from core.judgement.proposition_to_judgement import transition_proposition_to_ju
 from core.model import ProofState
 from core.proposition.proposition_closure import apply_proposition_closure
 from core.singular.closure_contracts import enforce_singular_closure
+from core.singular.closure_record import assemble_singular_closure_record
 from core.singular.conceptual_closure import apply_singular_conceptual_closure
 from core.singular.informational_closure import apply_singular_informational_closure
 from core.singular.perceptual_closure import apply_singular_perceptual_closure
+from core.singular.weight_handoff_closure import apply_singular_weight_handoff_closure
 from core.trace.replay_engine import replay_digest
 from core.trace.singular_trace import emit_singular_trace
 from core.weight.derivational_eligibility import determine_derivational_eligibility
@@ -36,12 +38,14 @@ class EndToEndProofTests(unittest.TestCase):
         apply_singular_perceptual_closure(state)
         apply_singular_informational_closure(state)
         apply_singular_conceptual_closure(state)
-        enforce_singular_closure(state)
-        emit_singular_trace(state)
 
         apply_mizan_closure(state)
         legal = verify_weight_legality(state)
         determine_derivational_eligibility(state, legal)
+        apply_singular_weight_handoff_closure(state)
+        assemble_singular_closure_record(state)
+        enforce_singular_closure(state)
+        emit_singular_trace(state)
 
         apply_role_distribution_composition(state)
         detect_ambiguity(state)
@@ -58,6 +62,7 @@ class EndToEndProofTests(unittest.TestCase):
         self.assertEqual(state.judgement, "accepted")
         self.assertTrue(state.proposition_closed)
         self.assertTrue(state.communicative_closed)
+        self.assertTrue(state.ready_for_composition)
         self.assertEqual(digest_1, digest_2)
 
 
