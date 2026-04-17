@@ -71,11 +71,11 @@ SELECT * FROM (
         (SELECT id FROM articulation_places WHERE code='UVULAR'), 3, 'fricative',
         'voiceless', 'plain', TRUE, FALSE, FALSE, TRUE, FALSE, 0.970, 0.940, 1.180, 1.020, 'لهوي مهموس'),
 
-    ('QAF', 'ق', 'ق', 'ق', 'U+0642', 'consonant',
+    ('QAF', 'ق', 'قاف', 'ق', 'U+0642', 'consonant',
         (SELECT id FROM articulation_places WHERE code='UVULAR'), 3, 'stop',
         'voiceless', 'plain', TRUE, FALSE, FALSE, FALSE, FALSE, 1.050, 1.020, 1.150, 1.120, 'شديد لهوي'),
 
-    ('KAF', 'ك', 'ك', 'ك', 'U+0643', 'consonant',
+    ('KAF', 'ك', 'كاف', 'ك', 'U+0643', 'consonant',
         (SELECT id FROM articulation_places WHERE code='VELAR'), 4, 'stop',
         'voiceless', 'plain', TRUE, FALSE, FALSE, FALSE, FALSE, 1.080, 1.050, 1.000, 1.050, 'شديد طبقي'),
 
