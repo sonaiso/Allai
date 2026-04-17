@@ -4,7 +4,6 @@ from core.model import ProofState
 _DECISION_PASS = "PASS"
 _DECISION_SUSPEND = "SUSPEND"
 _DECISION_REJECT = "REJECT"
-_DECISION_COMPLETE = "COMPLETE"
 
 
 def _required_rank_states(state: ProofState) -> dict[str, bool]:
@@ -27,11 +26,8 @@ def apply_singular_unified_closure(state: ProofState) -> ProofState:
         if state.singular_level_blockers.get(rank)
     }
 
-    closed = all(rank_states.values()) and not blockers
-    if closed and bool(state.composition):
-        decision = _DECISION_COMPLETE
-        reason = "unified_closure_complete_and_composed"
-    elif closed:
+    closed = all(rank_states.values()) and len(blockers) == 0
+    if closed:
         decision = _DECISION_PASS
         reason = "all_required_ranks_closed"
     elif any(rank_states.values()):

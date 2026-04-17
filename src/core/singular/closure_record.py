@@ -19,6 +19,13 @@ def _rank_states(state: ProofState) -> dict[str, bool]:
     }
 
 
+def _resolve_rank_blocker(state: ProofState, rank: str) -> str | None:
+    rank_blocker = state.singular_rank_blockers.get(rank)
+    if rank_blocker is not None:
+        return rank_blocker
+    return state.singular_level_blockers.get(rank)
+
+
 def assemble_singular_closure_record(state: ProofState) -> ProofState:
     rank_states = _rank_states(state)
     blockers = {
@@ -27,10 +34,18 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
         if state.singular_level_blockers.get(rank)
     }
 
-    decision = state.singular_final_decision or ("PASS" if state.ready_for_composition else "SUSPEND")
-    decision_reason = state.singular_final_decision_reason or (
-        "all_required_ranks_closed" if state.ready_for_composition else "unified_closure_not_complete"
-    )
+    if state.singular_final_decision:
+        decision = state.singular_final_decision
+        decision_reason = state.singular_final_decision_reason or "provided_by_unified_closure"
+    elif state.singular_unified_closure_closed:
+        decision = "PASS"
+        decision_reason = "all_required_ranks_closed"
+    else:
+        decision = "SUSPEND"
+        decision_reason = "unified_closure_stage_missing_or_incomplete"
+    if state.ready_for_composition and state.composition != {}:
+        decision = "COMPLETE"
+        decision_reason = "unified_closure_complete_and_composed"
 
     seed_payload = {
         "text": state.effective_text(),
@@ -51,11 +66,11 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
     state.relational_closed = rank_states["relational"]
     state.weight_handoff_closed = rank_states["weight"]
 
-    hierarchical_trace = [
-        event
-        for event in state.trace_chain
-        if str(event.get("event", "")).startswith("singular_") and str(event.get("event", "")).endswith("closure")
-    ]
+    hierarchical_trace = []
+    for event in state.trace_chain:
+        event_name = str(event.get("event", ""))
+        if event_name.startswith("singular_") and event_name.endswith("closure"):
+            hierarchical_trace.append(event)
 
     state.singular_closure_record = {
         "closure_record_id": closure_record_id,
@@ -75,7 +90,7 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
         "hierarchical_blockers": {
             rank: {
                 "rank": rank,
-                "blocker": state.singular_rank_blockers.get(rank, state.singular_level_blockers.get(rank)),
+                "blocker": _resolve_rank_blocker(state, rank),
             }
             for rank in list(rank_states.keys()) + ["unified_closure"]
         },

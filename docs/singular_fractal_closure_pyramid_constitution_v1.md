@@ -97,3 +97,7 @@ Every rank is a possibility condition for the next rank:
 
 ## Legacy bridge
 Legacy flags (`perceptual`, `informational`, `conceptual`) remain compatibility views only and cannot bypass unified closure requirements.
+
+## Clarification: logical-classificatory vs unified closure
+Operationally, `logical-classificatory` is a mandatory constitutional stage after weight and before unified closure.  
+`unified closure` remains the final gating rank that merges all prior evidence and issues the final decision.

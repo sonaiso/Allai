@@ -3,7 +3,7 @@ from core.model import ProofState
 
 def apply_singular_logical_classificatory_closure(state: ProofState) -> ProofState:
     if not state.singular_weight_closed:
-        blocker = "prior_level_incomplete:weight"
+        blocker = "prior_rank_incomplete:weight"
         state.singular_logical_classificatory_closed = False
         state.singular_level_evidence["logical_classificatory"] = {}
         state.singular_level_blockers["logical_classificatory"] = blocker
