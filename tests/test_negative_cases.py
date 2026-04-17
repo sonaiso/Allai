@@ -39,10 +39,14 @@ class NegativeCaseTests(unittest.TestCase):
         required_events_out_of_order = [
             "unicode_ingress",
             "admissibility_checked",
-            "singular_informational_closure",
-            "singular_perceptual_closure",
-            "singular_conceptual_closure",
+            "singular_designation_closure",
+            "singular_existence_closure",
+            "singular_possibility_closure",
+            "singular_identity_closure",
+            "singular_relational_closure",
             "mizan_closure",
+            "singular_weight_handoff_closure",
+            "singular_closure_record_assembled",
             "composition_applied",
             "ambiguity_detected",
             "ambiguity_ranked",
@@ -55,6 +59,7 @@ class NegativeCaseTests(unittest.TestCase):
             for idx, event in enumerate(required_events_out_of_order, start=1)
         ]
         self.assertFalse(validate_trace_chain(state))
+        self.assertEqual(state.trace_chain[-1]["event"], "trace_chain_rejected")
 
 
 if __name__ == "__main__":

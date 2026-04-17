@@ -6,14 +6,16 @@ class GateViolationError(ValueError):
 
 
 def require_for_composition(state: ProofState) -> None:
-    if not (
-        state.singular_perceptual_closed
-        and state.singular_informational_closed
-        and state.singular_conceptual_closed
-        and state.weight_closed
-    ):
-        state.add_trace("composition_rejected", {"reason": "missing_singular_or_weight_closure"})
-        raise GateViolationError("No composition without singular closure + weight closure.")
+    record_ready = bool(state.singular_closure_record) and state.ready_for_composition
+    if not record_ready:
+        state.add_trace(
+            "composition_rejected",
+            {
+                "reason": "missing_or_incomplete_singular_closure_record",
+                "closure_record_id": state.closure_record_id,
+            },
+        )
+        raise GateViolationError("No composition without a complete singular closure record.")
 
 
 def require_for_judgement(state: ProofState, trace_chain_valid: bool) -> None:

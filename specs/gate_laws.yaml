@@ -2,13 +2,17 @@ version: 1
 scope: proof_mvp_v1
 laws:
   - id: GL-001
-    name: composition_requires_singular_and_weight
+    name: composition_requires_complete_singular_closure_record
     when: composition
     requires:
-      - singular_perceptual_closed
-      - singular_informational_closed
-      - singular_conceptual_closed
+      - closure_record_exists
+      - existence_closed
+      - designation_closed
+      - possibility_closed
+      - identity_closed
+      - relational_closed
       - weight_closed
+      - ready_for_composition
   - id: GL-002
     name: judgement_requires_proposition_communication_ambiguity_trace
     when: judgement

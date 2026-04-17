@@ -15,6 +15,25 @@ class ProofState:
     singular_perceptual_closed: bool = False
     singular_informational_closed: bool = False
     singular_conceptual_closed: bool = False
+    singular_existence_closed: bool = False
+    singular_designation_closed: bool = False
+    singular_possibility_closed: bool = False
+    singular_identity_closed: bool = False
+    singular_relational_closed: bool = False
+    singular_weight_closed: bool = False
+
+    singular_level_evidence: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    singular_level_blockers: Dict[str, Optional[str]] = field(default_factory=dict)
+
+    closure_record_id: Optional[str] = None
+    existence_closed: bool = False
+    designation_closed: bool = False
+    possibility_closed: bool = False
+    identity_closed: bool = False
+    relational_closed: bool = False
+    weight_handoff_closed: bool = False
+    ready_for_composition: bool = False
+    singular_closure_record: Dict[str, Any] = field(default_factory=dict)
 
     weight_closed: bool = False
     weight_label: Optional[str] = None

@@ -4,10 +4,14 @@ from core.model import ProofState
 _REQUIRED_EVENTS_FOR_JUDGEMENT = [
     "unicode_ingress",
     "admissibility_checked",
-    "singular_perceptual_closure",
-    "singular_informational_closure",
-    "singular_conceptual_closure",
+    "singular_existence_closure",
+    "singular_designation_closure",
+    "singular_possibility_closure",
+    "singular_identity_closure",
+    "singular_relational_closure",
     "mizan_closure",
+    "singular_weight_handoff_closure",
+    "singular_closure_record_assembled",
     "composition_applied",
     "ambiguity_detected",
     "ambiguity_ranked",
@@ -17,13 +21,18 @@ _REQUIRED_EVENTS_FOR_JUDGEMENT = [
 ]
 
 
+def _reject(state: ProofState, reason: str) -> bool:
+    state.add_trace("trace_chain_rejected", {"reason": reason})
+    return False
+
+
 def validate_trace_chain(state: ProofState) -> bool:
     if not state.trace_chain:
-        return False
+        return _reject(state, "empty_trace_chain")
 
     ids = [item["event_id"] for item in state.trace_chain]
     if ids != list(range(1, len(ids) + 1)):
-        return False
+        return _reject(state, "non_sequential_event_ids")
 
     event_positions = {}
     for index, item in enumerate(state.trace_chain):
@@ -31,8 +40,13 @@ def validate_trace_chain(state: ProofState) -> bool:
         if event not in event_positions:
             event_positions[event] = index
 
-    if not all(event in event_positions for event in _REQUIRED_EVENTS_FOR_JUDGEMENT):
-        return False
+    missing = [event for event in _REQUIRED_EVENTS_FOR_JUDGEMENT if event not in event_positions]
+    if missing:
+        return _reject(state, f"missing_required_events:{','.join(missing)}")
 
     positions = [event_positions[event] for event in _REQUIRED_EVENTS_FOR_JUDGEMENT]
-    return positions == sorted(positions)
+    if positions != sorted(positions):
+        return _reject(state, "required_events_out_of_order")
+
+    state.add_trace("trace_chain_validated", {})
+    return True
