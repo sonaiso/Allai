@@ -7,6 +7,9 @@ def apply_singular_relational_closure(state: ProofState) -> ProofState:
         state.singular_relational_closed = False
         state.singular_level_evidence["relational"] = {}
         state.singular_level_blockers["relational"] = blocker
+        state.singular_rank_states["relational"] = False
+        state.singular_rank_sublayers["relational"] = {}
+        state.singular_rank_blockers["relational"] = blocker
         state.add_trace("singular_relational_closure", {"closed": False, "blocker": blocker})
         return state
 
@@ -32,5 +35,8 @@ def apply_singular_relational_closure(state: ProofState) -> ProofState:
     state.singular_relational_closed = closed
     state.singular_level_evidence["relational"] = evidence
     state.singular_level_blockers["relational"] = blocker
+    state.singular_rank_states["relational"] = closed
+    state.singular_rank_sublayers["relational"] = evidence
+    state.singular_rank_blockers["relational"] = blocker
     state.add_trace("singular_relational_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state

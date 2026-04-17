@@ -7,6 +7,9 @@ def apply_singular_possibility_closure(state: ProofState) -> ProofState:
         state.singular_possibility_closed = False
         state.singular_level_evidence["possibility"] = {}
         state.singular_level_blockers["possibility"] = blocker
+        state.singular_rank_states["possibility"] = False
+        state.singular_rank_sublayers["possibility"] = {}
+        state.singular_rank_blockers["possibility"] = blocker
         state.add_trace("singular_possibility_closure", {"closed": False, "blocker": blocker})
         return state
 
@@ -26,5 +29,8 @@ def apply_singular_possibility_closure(state: ProofState) -> ProofState:
     state.singular_possibility_closed = closed
     state.singular_level_evidence["possibility"] = evidence
     state.singular_level_blockers["possibility"] = blocker
+    state.singular_rank_states["possibility"] = closed
+    state.singular_rank_sublayers["possibility"] = evidence
+    state.singular_rank_blockers["possibility"] = blocker
     state.add_trace("singular_possibility_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state

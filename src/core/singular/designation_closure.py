@@ -19,6 +19,9 @@ def apply_singular_designation_closure(state: ProofState) -> ProofState:
         state.singular_designation_closed = False
         state.singular_level_evidence["designation"] = _designation_evidence("")
         state.singular_level_blockers["designation"] = blocker
+        state.singular_rank_states["designation"] = False
+        state.singular_rank_sublayers["designation"] = state.singular_level_evidence["designation"]
+        state.singular_rank_blockers["designation"] = blocker
         state.add_trace("singular_designation_closure", {"closed": False, "blocker": blocker})
         return state
 
@@ -30,5 +33,8 @@ def apply_singular_designation_closure(state: ProofState) -> ProofState:
     state.singular_designation_closed = closed
     state.singular_level_evidence["designation"] = evidence
     state.singular_level_blockers["designation"] = blocker
+    state.singular_rank_states["designation"] = closed
+    state.singular_rank_sublayers["designation"] = evidence
+    state.singular_rank_blockers["designation"] = blocker
     state.add_trace("singular_designation_closure", {"closed": closed, "blocker": blocker, "evidence": evidence})
     return state

@@ -10,6 +10,7 @@ from core.gates.validator import GateViolationError
 from core.judgement.proposition_to_judgement import transition_proposition_to_judgement
 from core.model import ProofState
 from core.singular.closure_record import assemble_singular_closure_record
+from core.singular.unified_closure import apply_singular_unified_closure
 
 
 class ContractInvariantTests(unittest.TestCase):
@@ -32,6 +33,8 @@ class ContractInvariantTests(unittest.TestCase):
         state.singular_identity_closed = True
         state.singular_relational_closed = True
         state.singular_weight_closed = True
+        state.singular_logical_classificatory_closed = True
+        apply_singular_unified_closure(state)
         assemble_singular_closure_record(state)
         with self.assertRaises(GateViolationError):
             apply_role_distribution_composition(state)
