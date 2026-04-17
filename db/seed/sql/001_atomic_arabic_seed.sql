@@ -20,6 +20,146 @@ ON CONFLICT (code) DO NOTHING;
 
 COMMIT;
 
+-- 3.9 جدول الجذور roots
+BEGIN;
+
+INSERT INTO roots (
+    code, arabic_root, transliteration, radical_count,
+    semantic_base_class, cognitive_capacity, notes
+)
+VALUES
+('KTB', 'كتب', 'k-t-b', 3, 'writing_inscription', 1.250, 'جذر الكتابة والإثبات'),
+('DRS', 'درس', 'd-r-s', 3, 'study_learning', 1.180, 'جذر الدرس والتعلم'),
+('QWL', 'قول', 'q-w-l', 3, 'speech_utterance', 1.050, 'جذر القول مع صامت لين')
+ON CONFLICT (code) DO NOTHING;
+
+COMMIT;
+
+-- 3.10 جدول ترتيب صوامت الجذور root_segments
+BEGIN;
+
+INSERT INTO root_segments (root_id, radical_index, segment_id, position_weight)
+VALUES
+((SELECT id FROM roots WHERE code='KTB'), 1, (SELECT id FROM segment_units WHERE code='KAF'), 1.000),
+((SELECT id FROM roots WHERE code='KTB'), 2, (SELECT id FROM segment_units WHERE code='TA_SIMPLE'), 1.000),
+((SELECT id FROM roots WHERE code='KTB'), 3, (SELECT id FROM segment_units WHERE code='BA'), 1.000),
+
+((SELECT id FROM roots WHERE code='DRS'), 1, (SELECT id FROM segment_units WHERE code='DAL'), 1.000),
+((SELECT id FROM roots WHERE code='DRS'), 2, (SELECT id FROM segment_units WHERE code='RA'), 1.000),
+((SELECT id FROM roots WHERE code='DRS'), 3, (SELECT id FROM segment_units WHERE code='SIN'), 1.000),
+
+((SELECT id FROM roots WHERE code='QWL'), 1, (SELECT id FROM segment_units WHERE code='QAF'), 1.000),
+((SELECT id FROM roots WHERE code='QWL'), 2, (SELECT id FROM segment_units WHERE code='WAW'), 0.920),
+((SELECT id FROM roots WHERE code='QWL'), 3, (SELECT id FROM segment_units WHERE code='LAM'), 1.000)
+ON CONFLICT (root_id, radical_index) DO NOTHING;
+
+COMMIT;
+
+-- 3.11 تفكيك القالب إلى خانات علائقية pattern_slots
+BEGIN;
+
+WITH extracted AS (
+    SELECT
+        p.id AS pattern_id,
+        slot.ordinality::INTEGER AS slot_index,
+        slot.elem AS slot_elem,
+        slot.elem->>'type' AS slot_kind,
+        CASE
+            WHEN slot.elem->>'type' = 'augmentation' THEN slot.elem->>'value'
+            WHEN slot.elem->>'type' = 'gemination' THEN 'AUG_GEMINATE_R2'
+            WHEN slot.elem->>'type' = 'lengthening' THEN
+                CASE slot.elem->>'value'
+                    WHEN 'ALIF_MADD' THEN 'AUG_ALIF_MEDIAL'
+                    WHEN 'WAW_MADD' THEN 'AUG_WAW_MEDIAL'
+                    WHEN 'YA_MADD' THEN 'AUG_YA_MEDIAL'
+                    ELSE NULL
+                END
+            ELSE NULL
+        END AS augmentation_code,
+        CASE
+            WHEN slot.elem->>'type' = 'vowel' THEN slot.elem->>'value'
+            WHEN slot.elem->>'type' = 'lengthening' THEN slot.elem->>'value'
+            ELSE NULL
+        END AS vowel_code
+    FROM patterns p
+    CROSS JOIN LATERAL jsonb_array_elements(p.abstract_template->'slots') WITH ORDINALITY AS slot(elem, ordinality)
+)
+INSERT INTO pattern_slots (
+    pattern_id, slot_index, slot_kind, root_index, vowel_id,
+    augmentation_type_id, gemination_target_index, obligatory,
+    cost_impact, notes
+)
+SELECT
+    e.pattern_id,
+    e.slot_index,
+    e.slot_kind,
+    CASE
+        WHEN e.slot_kind = 'root' THEN (e.slot_elem->>'index')::INTEGER
+        ELSE NULL
+    END AS root_index,
+    vu.id AS vowel_id,
+    at.id AS augmentation_type_id,
+    CASE
+        WHEN e.slot_kind = 'gemination' THEN
+            CASE e.slot_elem->>'target'
+                WHEN 'root1' THEN 1
+                WHEN 'root2' THEN 2
+                WHEN 'root3' THEN 3
+                WHEN 'root4' THEN 4
+                ELSE NULL
+            END
+        ELSE NULL
+    END AS gemination_target_index,
+    TRUE AS obligatory,
+    COALESCE(at.default_cost, 0.000) AS cost_impact,
+    'تفكيك علائقي من abstract_template' AS notes
+FROM extracted e
+LEFT JOIN augmentation_types at ON at.code = e.augmentation_code
+LEFT JOIN vowel_units vu ON vu.code = e.vowel_code
+ON CONFLICT (pattern_id, slot_index) DO NOTHING;
+
+COMMIT;
+
+-- 3.12 تعبئة مبدئية لنتائج score(root, pattern)
+BEGIN;
+
+INSERT INTO root_pattern_scores (
+    root_id, pattern_id,
+    pattern_base_score, augmentation_fit, vocalic_fit, syllabic_balance,
+    articulatory_cost, cognitive_cost, total_score, score_trace
+)
+SELECT
+    s.root_id,
+    s.pattern_id,
+    s.pattern_base_score,
+    s.augmentation_fit,
+    s.vocalic_fit,
+    s.syllabic_balance,
+    s.articulatory_cost,
+    s.cognitive_cost,
+    s.total_score,
+    s.score_trace
+FROM roots r
+JOIN patterns p ON p.root_slots = r.radical_count
+CROSS JOIN LATERAL score_root_pattern(r.id, p.id) s
+WHERE r.code IN ('KTB', 'DRS', 'QWL')
+  AND p.code IN (
+      'FA3ALA', 'FA33ALA', 'FAA3ALA', 'AF3ALA', 'TAFA33ALA',
+      'ISTAF3ALA', 'FAA3IL', 'MAF3UL', 'MAF3AL', 'TAF3IL'
+  )
+ON CONFLICT (root_id, pattern_id) DO UPDATE SET
+    pattern_base_score = EXCLUDED.pattern_base_score,
+    augmentation_fit = EXCLUDED.augmentation_fit,
+    vocalic_fit = EXCLUDED.vocalic_fit,
+    syllabic_balance = EXCLUDED.syllabic_balance,
+    articulatory_cost = EXCLUDED.articulatory_cost,
+    cognitive_cost = EXCLUDED.cognitive_cost,
+    total_score = EXCLUDED.total_score,
+    score_trace = EXCLUDED.score_trace,
+    created_at = NOW();
+
+COMMIT;
+
 -- 3.2 جدول أنواع الزيادة المرجعية
 BEGIN;
 

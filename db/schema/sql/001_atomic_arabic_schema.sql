@@ -335,4 +335,205 @@ CREATE TABLE IF NOT EXISTS pattern_augmentation_map (
 
 CREATE INDEX IF NOT EXISTS idx_pattern_aug_map_pattern ON pattern_augmentation_map(pattern_id);
 
+-- =========================================================
+-- 9. TABLE 7: roots
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS roots (
+    id                      BIGSERIAL PRIMARY KEY,
+    code                    VARCHAR(50) NOT NULL UNIQUE,
+    arabic_root             VARCHAR(20) NOT NULL,
+    transliteration         VARCHAR(50),
+    radical_count           INTEGER NOT NULL CHECK (radical_count BETWEEN 2 AND 6),
+    semantic_base_class     VARCHAR(100),
+    cognitive_capacity      NUMERIC(6,3) NOT NULL DEFAULT 1.000 CHECK (cognitive_capacity > 0),
+    notes                   TEXT
+);
+
+-- =========================================================
+-- 10. TABLE 8: root_segments
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS root_segments (
+    id                      BIGSERIAL PRIMARY KEY,
+    root_id                 BIGINT NOT NULL REFERENCES roots(id) ON DELETE CASCADE,
+    radical_index           INTEGER NOT NULL CHECK (radical_index BETWEEN 1 AND 6),
+    segment_id              BIGINT NOT NULL REFERENCES segment_units(id),
+    position_weight         NUMERIC(6,3) NOT NULL DEFAULT 1.000 CHECK (position_weight >= 0),
+    UNIQUE(root_id, radical_index)
+);
+
+CREATE INDEX IF NOT EXISTS idx_root_segments_root ON root_segments(root_id);
+CREATE INDEX IF NOT EXISTS idx_root_segments_segment ON root_segments(segment_id);
+
+-- =========================================================
+-- 11. TABLE 9: pattern_slots
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS pattern_slots (
+    id                      BIGSERIAL PRIMARY KEY,
+    pattern_id              BIGINT NOT NULL REFERENCES patterns(id) ON DELETE CASCADE,
+    slot_index              INTEGER NOT NULL CHECK (slot_index > 0),
+    slot_kind               VARCHAR(20) NOT NULL CHECK (slot_kind IN ('root', 'vowel', 'augmentation', 'gemination', 'lengthening')),
+    root_index              INTEGER CHECK (root_index IS NULL OR root_index BETWEEN 1 AND 6),
+    vowel_id                BIGINT REFERENCES vowel_units(id),
+    augmentation_type_id    BIGINT REFERENCES augmentation_types(id),
+    gemination_target_index INTEGER CHECK (gemination_target_index IS NULL OR gemination_target_index BETWEEN 1 AND 6),
+    obligatory              BOOLEAN NOT NULL DEFAULT TRUE,
+    cost_impact             NUMERIC(6,3) NOT NULL DEFAULT 0.000 CHECK (cost_impact >= 0),
+    notes                   TEXT,
+    UNIQUE(pattern_id, slot_index),
+    CHECK (
+        (slot_kind = 'root' AND root_index IS NOT NULL AND vowel_id IS NULL AND augmentation_type_id IS NULL AND gemination_target_index IS NULL)
+        OR
+        (slot_kind = 'vowel' AND root_index IS NULL AND vowel_id IS NOT NULL AND augmentation_type_id IS NULL AND gemination_target_index IS NULL)
+        OR
+        (slot_kind = 'augmentation' AND root_index IS NULL AND vowel_id IS NULL AND augmentation_type_id IS NOT NULL AND gemination_target_index IS NULL)
+        OR
+        (slot_kind = 'lengthening' AND root_index IS NULL AND vowel_id IS NOT NULL AND augmentation_type_id IS NOT NULL AND gemination_target_index IS NULL)
+        OR
+        (slot_kind = 'gemination' AND root_index IS NULL AND vowel_id IS NULL AND augmentation_type_id IS NOT NULL AND gemination_target_index IS NOT NULL)
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_pattern_slots_pattern ON pattern_slots(pattern_id);
+CREATE INDEX IF NOT EXISTS idx_pattern_slots_kind ON pattern_slots(slot_kind);
+
+-- =========================================================
+-- 12. TABLE 10: root_pattern_scores
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS root_pattern_scores (
+    id                      BIGSERIAL PRIMARY KEY,
+    root_id                 BIGINT NOT NULL REFERENCES roots(id) ON DELETE CASCADE,
+    pattern_id              BIGINT NOT NULL REFERENCES patterns(id) ON DELETE CASCADE,
+    pattern_base_score      NUMERIC(9,4) NOT NULL,
+    augmentation_fit        NUMERIC(9,4) NOT NULL,
+    vocalic_fit             NUMERIC(9,4) NOT NULL,
+    syllabic_balance        NUMERIC(9,4) NOT NULL,
+    articulatory_cost       NUMERIC(9,4) NOT NULL,
+    cognitive_cost          NUMERIC(9,4) NOT NULL,
+    total_score             NUMERIC(9,4) NOT NULL,
+    score_trace             JSONB NOT NULL DEFAULT '{}'::JSONB,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(root_id, pattern_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_root_pattern_scores_total ON root_pattern_scores(total_score DESC);
+
+-- =========================================================
+-- 13. FUNCTION: score_root_pattern(root, pattern)
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION score_root_pattern(p_root_id BIGINT, p_pattern_id BIGINT)
+RETURNS TABLE (
+    root_id             BIGINT,
+    pattern_id          BIGINT,
+    pattern_base_score  NUMERIC(9,4),
+    augmentation_fit    NUMERIC(9,4),
+    vocalic_fit         NUMERIC(9,4),
+    syllabic_balance    NUMERIC(9,4),
+    articulatory_cost   NUMERIC(9,4),
+    cognitive_cost      NUMERIC(9,4),
+    total_score         NUMERIC(9,4),
+    score_trace         JSONB
+)
+LANGUAGE SQL
+STABLE
+AS $$
+WITH selected_pattern AS (
+    SELECT *
+    FROM patterns
+    WHERE id = p_pattern_id
+),
+selected_root AS (
+    SELECT *
+    FROM roots
+    WHERE id = p_root_id
+),
+root_articulation AS (
+    SELECT
+        COALESCE(AVG(su.articulatory_cost), 0.000) AS avg_root_articulatory_cost
+    FROM root_segments rs
+    JOIN segment_units su ON su.id = rs.segment_id
+    WHERE rs.root_id = p_root_id
+),
+augmentation_component AS (
+    SELECT
+        COALESCE(AVG(GREATEST(0::NUMERIC, 1 - ((pam.cost_impact + at.default_cost) / 2))), 1.000) AS augmentation_fit,
+        COALESCE(SUM(pam.cost_impact + at.default_cost), 0.000) AS augmentation_total_cost
+    FROM pattern_augmentation_map pam
+    JOIN augmentation_types at ON at.id = pam.augmentation_type_id
+    WHERE pam.pattern_id = p_pattern_id
+),
+vocalic_component AS (
+    SELECT
+        COALESCE(
+            AVG((vu.phonetic_weight + vu.temporal_weight) / NULLIF(vu.articulatory_cost + vu.perceptual_cost, 0)),
+            1.000
+        ) AS vocalic_fit
+    FROM pattern_slots ps
+    JOIN vowel_units vu ON vu.id = ps.vowel_id
+    WHERE ps.pattern_id = p_pattern_id
+      AND ps.slot_kind IN ('vowel', 'lengthening')
+),
+syllabic_component AS (
+    SELECT
+        COALESCE(MAX(GREATEST(0::NUMERIC, 1 - ABS(sp.closure_degree - p.closure_profile))), 0.500) AS syllabic_balance
+    FROM selected_pattern p
+    CROSS JOIN syllable_patterns sp
+),
+components AS (
+    SELECT
+        r.id AS root_id,
+        p.id AS pattern_id,
+        ((p.usage_stability + p.derivational_load + p.inflectional_potential) / 3.0)::NUMERIC(9,4) AS pattern_base_score,
+        a.augmentation_fit::NUMERIC(9,4) AS augmentation_fit,
+        v.vocalic_fit::NUMERIC(9,4) AS vocalic_fit,
+        s.syllabic_balance::NUMERIC(9,4) AS syllabic_balance,
+        (
+            p.articulatory_cost
+            + ra.avg_root_articulatory_cost
+            + (a.augmentation_total_cost * 0.100)
+        )::NUMERIC(9,4) AS articulatory_cost,
+        (
+            p.cognitive_cost
+            + (COALESCE(p.augmentation_slots, 0) * 0.100)
+            + (1 / NULLIF(r.cognitive_capacity, 0))
+        )::NUMERIC(9,4) AS cognitive_cost
+    FROM selected_root r
+    CROSS JOIN selected_pattern p
+    CROSS JOIN root_articulation ra
+    CROSS JOIN augmentation_component a
+    CROSS JOIN vocalic_component v
+    CROSS JOIN syllabic_component s
+)
+SELECT
+    c.root_id,
+    c.pattern_id,
+    c.pattern_base_score,
+    c.augmentation_fit,
+    c.vocalic_fit,
+    c.syllabic_balance,
+    c.articulatory_cost,
+    c.cognitive_cost,
+    (
+        c.pattern_base_score
+        + c.augmentation_fit
+        + c.vocalic_fit
+        + c.syllabic_balance
+        - c.articulatory_cost
+        - c.cognitive_cost
+    )::NUMERIC(9,4) AS total_score,
+    jsonb_build_object(
+        'pattern_base_score', c.pattern_base_score,
+        'augmentation_fit', c.augmentation_fit,
+        'vocalic_fit', c.vocalic_fit,
+        'syllabic_balance', c.syllabic_balance,
+        'articulatory_cost', c.articulatory_cost,
+        'cognitive_cost', c.cognitive_cost
+    ) AS score_trace
+FROM components c;
+$$;
+
 COMMIT;
