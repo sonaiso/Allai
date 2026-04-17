@@ -5,11 +5,19 @@ from core.model import ProofState
 
 def _designation_evidence(text: str) -> dict[str, bool]:
     tokens = [t for t in text.split() if t]
-    return {
+    minimum_conditions = {
+        "boundary_fixed": bool(tokens),
+        "separation_possible": bool(tokens),
+        "position_addressable": bool(tokens),
+    }
+    higher_analysis = {
         "identified_char": any(not ch.isspace() for ch in text),
         "identified_haraka": any(unicodedata.combining(ch) > 0 for ch in text),
         "identified_syllable": bool(tokens),
-        "boundary_fixed": bool(tokens),
+    }
+    return {
+        "minimum_conditions": minimum_conditions,
+        "higher_analysis": higher_analysis,
     }
 
 
@@ -27,7 +35,8 @@ def apply_singular_designation_closure(state: ProofState) -> ProofState:
 
     text = state.effective_text()
     evidence = _designation_evidence(text)
-    closed = evidence["identified_char"] and evidence["identified_syllable"] and evidence["boundary_fixed"]
+    minimum_conditions = evidence["minimum_conditions"]
+    closed = all(minimum_conditions.values())
     blocker = None if closed else "designation_incomplete"
 
     state.singular_designation_closed = closed

@@ -67,6 +67,9 @@ class EndToEndProofTests(unittest.TestCase):
         self.assertTrue(state.proposition_closed)
         self.assertTrue(state.communicative_closed)
         self.assertTrue(state.ready_for_composition)
+        self.assertIn("minimum_gate_snapshot", state.singular_closure_record)
+        self.assertIn("deferred_analysis_snapshot", state.singular_closure_record)
+        self.assertIn("unified_closure", state.singular_closure_record["minimum_gate_snapshot"])
         self.assertEqual(digest_1, digest_2)
 
 

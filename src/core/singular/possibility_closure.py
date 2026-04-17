@@ -15,7 +15,11 @@ def apply_singular_possibility_closure(state: ProofState) -> ProofState:
 
     text = state.effective_text()
     tokens = [t for t in text.split() if t]
-    evidence = {
+    minimum_conditions = {
+        "suitable_for_at_least_one_form": bool(tokens),
+        "admits_transition_to_identity": bool(tokens),
+    }
+    higher_analysis = {
         "can_be_noun": bool(tokens),
         "can_be_verb": len(tokens) >= 1,
         "can_be_particle": len(tokens) == 1,
@@ -23,7 +27,11 @@ def apply_singular_possibility_closure(state: ProofState) -> ProofState:
         "can_take_place": len(tokens) >= 2,
         "can_compose": len(tokens) >= 1,
     }
-    closed = evidence["can_compose"] and (evidence["can_be_noun"] or evidence["can_be_verb"] or evidence["can_be_particle"])
+    evidence = {
+        "minimum_conditions": minimum_conditions,
+        "higher_analysis": higher_analysis,
+    }
+    closed = all(minimum_conditions.values())
     blocker = None if closed else "possibility_threshold_not_met"
 
     state.singular_possibility_closed = closed

@@ -72,6 +72,13 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
         if event_name.startswith("singular_") and event_name.endswith("closure"):
             hierarchical_trace.append(event)
 
+    minimum_gate_snapshot = {}
+    deferred_analysis_snapshot = {}
+    for rank, sublayers in state.singular_rank_sublayers.items():
+        if isinstance(sublayers, dict):
+            minimum_gate_snapshot[rank] = sublayers.get("minimum_conditions", {})
+            deferred_analysis_snapshot[rank] = sublayers.get("higher_analysis", {})
+
     state.singular_closure_record = {
         "closure_record_id": closure_record_id,
         "existence_closed": rank_states["existence"],
@@ -86,6 +93,8 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
         "blockers": blockers,
         "rank_states": rank_states,
         "sublayer_records": state.singular_rank_sublayers,
+        "minimum_gate_snapshot": minimum_gate_snapshot,
+        "deferred_analysis_snapshot": deferred_analysis_snapshot,
         "hierarchical_evidence": state.singular_level_evidence,
         "hierarchical_blockers": {
             rank: _resolve_rank_blocker(state, rank) for rank in (*rank_states.keys(), "unified_closure")

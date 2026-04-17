@@ -1,7 +1,21 @@
 # Singular Fractal Closure Pyramid Constitution v1
 
 ## Scope
-This constitutional document upgrades singular closure from a six-level linear flow to a hierarchical fractal pyramid with a unified closure register.
+This constitution defines the mandatory singular closure path for MVP v1.
+
+## Governing doctrine (minimum-first)
+**Singular closure does not require loading all possible categories at once.**
+For each rank, only the **minimum necessary transition conditions** are mandatory.
+Anything beyond the minimum is deferred to higher analysis layers.
+
+## Constitutional separation (non-mixing rule)
+The system must not mix:
+- **شرط (condition)** with **شارح (explanatory layer)**
+- **رتبة (rank)** with **مقياس (measurement/analytic scale)**
+- **أصل (structural origin)** with **ملحق (analytical attachment)**
+
+## Admission rule for minimum conditions
+A category enters mandatory minimum closure **only** if it is proven as a necessary condition for legal transition from rank `R_n` to rank `R_(n+1)`.
 
 ## Governing rule
 **No composition without a unified singular closure register.**
@@ -16,68 +30,89 @@ A singular unit cannot enter composition unless the unified register is complete
 6. Weight rank
 7. Unified closure rank
 
-## Rank sublayers
+## Rank structure contract
+Each rank must expose:
+1. `minimum_conditions` (mandatory gate)
+2. `higher_analysis` (deferred, non-blocking unless explicitly promoted by law)
+
+---
+
+## Rank minimum conditions and deferred analysis
 
 ### 1) Existence
-- presence
-- distinguishability
-- stability_or_transformability
+- **minimum_conditions (mandatory):**
+  - presence
+  - distinguishability
+  - non_annihilation
+- **higher_analysis (deferred):**
+  - marked units
+  - syllabic indicators
+  - lexical elaborations
 
 ### 2) Designation
-- boundary
-- separation
-- position
-- primary_count
+- **minimum_conditions (mandatory):**
+  - boundary_fixed
+  - separation_possible
+  - position_addressable
+- **higher_analysis (deferred):**
+  - haraka-level details
+  - expanded symbolic segmentation
 
 ### 3) Possibility
-- morpho_possibility
-- temporal_possibility
-- spatial_possibility
-- referential_possibility
-- relational_possibility
+- **minimum_conditions (mandatory):**
+  - suitable_for_at_least_one_form
+  - admits_transition_to_identity
+- **higher_analysis (deferred):**
+  - temporal/spatial/referential expansion
+  - advanced role projections
 
 ### 4) Identity
-- noun_verb_particle
-- definiteness
-- gender
-- built_or_inflected
-- derived_or_non_derived
-- referential_status
+- **minimum_conditions (mandatory):**
+  - has_grammatical_class
+  - has_referential_status
+  - has_inflection_mode
+  - has_derivation_mode
+- **higher_analysis (deferred):**
+  - definiteness
+  - gender
+  - derived/non-derived detail
+  - fine referential taxonomy
 
 ### 5) Relational capacity
-- agency
-- patientivity
-- causality
-- effectivity
-- predicability
-- restriction_eligibility
-- inclusion_eligibility
-- adverbiality
-- linking
-- governing_or_governed
+- **minimum_conditions (mandatory):**
+  - accepts_relation
+  - has_primary_relation_type
+- **higher_analysis (deferred):**
+  - agent/patient/causal/effect nuances
+  - advanced predication constraints
 
 ### 6) Weight
-- consonantal_unit
-- vocalic_legality
-- syllabic_legality
-- weight_pattern
-- derivational_legality
-- source_event_linkage
+- **minimum_conditions (mandatory):**
+  - legal handoff from `mizan_closure`
+  - constitutional weight legality
+- **higher_analysis (deferred):**
+  - detailed syllabic and derivational diagnostics
 
 ### 7) Unified closure
-- register_merge
-- final_decision
-- trace_preservation
-- readiness_for_composition
+- **minimum_conditions (mandatory):**
+  - all required prior ranks closed
+  - no unresolved mandatory blockers
+- **higher_analysis (deferred):**
+  - expanded causal explanation
+  - non-gating analytical summaries
 
-## Causality constraint
+---
+
+## Causality and no-jump constraints
 Every rank is a possibility condition for the next rank:
 - no designation without existence
 - no possibility without designation
 - no identity without possibility
 - no relational capacity without identity
 - no weight without relational capacity
-- no unified closure without all prior ranks
+- no unified closure without all prior mandatory ranks
+
+Direct rank skipping is invalid unless a dedicated constitutional exception is explicitly proven.
 
 ## Unified singular closure register (required sections)
 1. Existence register
@@ -88,16 +123,19 @@ Every rank is a possibility condition for the next rank:
 6. Weight register
 7. Logical-classificatory register
 8. Final closure decision register
+9. Minimum-gate snapshot
+10. Deferred-analysis snapshot
 
 ## Final decision states
-- `PASS`: all required ranks are closed and the unit is eligible for composition.
-- `SUSPEND`: partial closure exists but full unified threshold is not met.
-- `REJECT`: closure prerequisites fail fundamentally.
+- `PASS`: all required mandatory ranks are closed and the unit is eligible for composition.
+- `SUSPEND`: partial closure exists but full mandatory threshold is not met.
+- `REJECT`: mandatory prerequisites fail fundamentally.
 - `COMPLETE`: unified closure is complete and composition has been executed.
 
 ## Legacy bridge
 Legacy flags (`perceptual`, `informational`, `conceptual`) remain compatibility views only and cannot bypass unified closure requirements.
 
 ## Clarification: logical-classificatory vs unified closure
-Operationally, `logical-classificatory` is a mandatory constitutional stage after weight and before unified closure.  
-`unified closure` remains the final gating rank that merges all prior evidence and issues the final decision.
+`logical-classificatory` remains a mandatory constitutional rank in v1 sequencing.
+Its gate is minimum-first; its wider logical ontology remains deferred unless promoted by explicit law.
+`unified closure` remains the final gate that merges all mandatory evidence and issues final decision.

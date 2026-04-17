@@ -39,6 +39,11 @@ class ContractInvariantTests(unittest.TestCase):
         with self.assertRaises(GateViolationError):
             apply_role_distribution_composition(state)
 
+    def test_gate_laws_policy_declares_minimum_first(self) -> None:
+        content = (ROOT / "specs" / "gate_laws.yaml").read_text(encoding="utf-8")
+        self.assertIn("mandatory_gates: minimum_transition_conditions_only", content)
+        self.assertIn("deferred_layers_default: non_blocking", content)
+
 
 if __name__ == "__main__":
     unittest.main()
