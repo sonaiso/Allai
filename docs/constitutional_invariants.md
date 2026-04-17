@@ -26,5 +26,9 @@ Trace-chain validity requires required constitutional events to appear in consti
 **Mandatory closure gates include only minimum transition conditions.**
 Higher analytical fields are non-gating by default and cannot block transition unless explicitly promoted by constitutional gate law.
 
+## Non-negotiable rule 5 (foundational interpretive invariant)
+**Foundational constitutional definitions govern interpretation, not automatic gate expansion.**
+New foundational clauses become executable blockers only after explicit promotion into machine-checkable gate law and implementation.
+
 ## Legacy bridge invariant
 Legacy `perceptual/informational/conceptual` states are compatibility-only and do not grant composition rights unless unified closure is complete.
