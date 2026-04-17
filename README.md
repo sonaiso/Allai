@@ -9,6 +9,7 @@ REPO_ROOT="/path/to/Allai"
 cd "$REPO_ROOT"
 psql "$DATABASE_URL" -f "$REPO_ROOT/db/schema/sql/001_atomic_arabic_schema.sql"
 psql "$DATABASE_URL" -f "$REPO_ROOT/db/seed/sql/001_atomic_arabic_seed.sql"
+psql "$DATABASE_URL" -f "$REPO_ROOT/db/queries/sql/001_atomic_arabic_checks.sql"
 ```
 
 ## Run tests

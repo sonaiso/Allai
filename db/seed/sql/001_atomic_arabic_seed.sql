@@ -737,24 +737,24 @@ INSERT INTO pattern_augmentation_map (
 )
 VALUES
 (
+    (SELECT id FROM patterns WHERE code='FAA3ALA'),
+    (SELECT id FROM augmentation_types WHERE code='AUG_ALIF_MEDIAL'),
+    3,
+    'between_r1_r2',
+    TRUE,
+    0.220,
+    'امتداد أو مشاركة',
+    'ألف بعد الأصل الأول'
+),
+(
     (SELECT id FROM patterns WHERE code='FA33ALA'),
     (SELECT id FROM augmentation_types WHERE code='AUG_GEMINATE_R2'),
-    1,
+    4,
     'geminate_r2',
     TRUE,
     0.450,
-    'تكثير/تقوية',
-    'باب التفعيل'
-),
-(
-    (SELECT id FROM patterns WHERE code='FAA3ALA'),
-    (SELECT id FROM augmentation_types WHERE code='AUG_ALIF_MEDIAL'),
-    1,
-    'lengthen_after_r1',
-    TRUE,
-    0.220,
-    'مشاركة/مفاعلة',
-    'باب المفاعلة'
+    'تكثير أو تعدية أو تقوية',
+    'تضعيف الأصل الثاني'
 ),
 (
     (SELECT id FROM patterns WHERE code='AF3ALA'),
@@ -779,12 +779,12 @@ VALUES
 (
     (SELECT id FROM patterns WHERE code='TAFA33ALA'),
     (SELECT id FROM augmentation_types WHERE code='AUG_GEMINATE_R2'),
-    2,
+    6,
     'geminate_r2',
     TRUE,
     0.450,
-    'تكثير',
-    'باب التفعل'
+    'تقوية داخلية',
+    'تضعيف الأصل الثاني'
 ),
 (
     (SELECT id FROM patterns WHERE code='ISTAF3ALA'),
@@ -819,12 +819,12 @@ VALUES
 (
     (SELECT id FROM patterns WHERE code='FAA3IL'),
     (SELECT id FROM augmentation_types WHERE code='AUG_ALIF_MEDIAL'),
-    1,
-    'lengthen_after_r1',
+    3,
+    'between_r1_r2',
     TRUE,
     0.220,
-    'اسمية فاعلية',
-    'اسم الفاعل'
+    'امتداد وصفي/فاعلي',
+    'ألف بعد الأصل الأول'
 ),
 (
     (SELECT id FROM patterns WHERE code='MAF3UL'),
@@ -839,12 +839,12 @@ VALUES
 (
     (SELECT id FROM patterns WHERE code='MAF3UL'),
     (SELECT id FROM augmentation_types WHERE code='AUG_WAW_MEDIAL'),
-    2,
+    7,
     'lengthen_after_r2',
     TRUE,
     0.260,
-    'مد مفعولي',
-    'اسم المفعول'
+    'مد بنية المفعول',
+    'واو بعد العين'
 ),
 (
     (SELECT id FROM patterns WHERE code='MAF3AL'),
@@ -869,12 +869,12 @@ VALUES
 (
     (SELECT id FROM patterns WHERE code='TAF3IL'),
     (SELECT id FROM augmentation_types WHERE code='AUG_YA_MEDIAL'),
-    2,
+    7,
     'lengthen_after_r2',
     TRUE,
     0.260,
-    'امتداد مصدري',
-    'مصدر تفعيل'
+    'إطالة مصدرية',
+    'ياء بعد العين'
 )
 ON CONFLICT DO NOTHING;
 
