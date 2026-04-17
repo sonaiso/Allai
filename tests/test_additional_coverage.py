@@ -6,14 +6,20 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from core.ambiguity.conflict_resolution import resolve_ambiguity_conflicts
+from core.ambiguity.detection import detect_ambiguity
+from core.ambiguity.ranking import rank_ambiguity_candidates
+from core.communication.communicative_closure import apply_communicative_closure
 from core.composition.role_distribution import apply_role_distribution_composition
+from core.gates.validator import GateViolationError
 from core.ingress.admissibility_pre_u0 import apply_admissibility_pre_u0
 from core.ingress.unicode_ingress import apply_unicode_ingress
 from core.model import ProofState
 from core.proposition.proposition_closure import apply_proposition_closure
 from core.singular.closure_contracts import SingularClosureError, enforce_singular_closure
+from core.singular.conceptual_closure import apply_singular_conceptual_closure
 from core.trace.chain_validation import validate_trace_chain
 from core.trace.replay_engine import replay_digest
+from core.trace.singular_trace import emit_singular_trace
 from core.weight.derivational_eligibility import determine_derivational_eligibility
 from core.weight.mizan_closure import apply_mizan_closure
 from core.weight.weight_legality import verify_weight_legality
@@ -67,7 +73,7 @@ class AdditionalCoverageTests(unittest.TestCase):
         determine_derivational_eligibility(state, weight_legal=True)
         self.assertFalse(state.derivational_eligible)
 
-    def test_role_distribution_sets_implicit_predicate_for_single_token(self) -> None:
+    def test_role_distribution_rejects_single_token(self) -> None:
         state = ProofState(
             ingress_text="solo",
             normalized_text="solo",
@@ -76,15 +82,64 @@ class AdditionalCoverageTests(unittest.TestCase):
             singular_conceptual_closed=True,
             weight_closed=True,
         )
-        apply_role_distribution_composition(state)
-        self.assertEqual(state.composition["subject"], "solo")
-        self.assertEqual(state.composition["predicate"], "implicit")
+        with self.assertRaises(GateViolationError):
+            apply_role_distribution_composition(state)
+        self.assertEqual(state.trace_chain[-1]["event"], "composition_rejected")
 
     def test_conflict_resolution_suspends_when_detected_without_candidates(self) -> None:
         state = ProofState(ingress_text="x", ambiguity_detected=True, ambiguity_candidates=[])
         resolve_ambiguity_conflicts(state)
         self.assertEqual(state.ambiguity_outcome, "suspended")
         self.assertEqual(state.ambiguity_reason, "detected_but_unranked")
+
+    def test_conflict_resolution_resolves_when_not_detected(self) -> None:
+        state = ProofState(ingress_text="x", ambiguity_detected=False)
+        resolve_ambiguity_conflicts(state)
+        self.assertEqual(state.ambiguity_outcome, "resolved")
+        self.assertEqual(state.ambiguity_reason, "no_ambiguity_detected")
+
+    def test_ambiguity_detection_and_ranking_assigns_stable_order(self) -> None:
+        state = ProofState(ingress_text="A OR B / C ?")
+        detect_ambiguity(state)
+        self.assertTrue(state.ambiguity_detected)
+        self.assertEqual({c["marker"] for c in state.ambiguity_candidates}, {"/", "?", "or"})
+
+        rank_ambiguity_candidates(state)
+        ranked_markers = [c["marker"] for c in state.ambiguity_candidates]
+        self.assertEqual(ranked_markers, ["/", "?", "or"])
+        self.assertEqual([c["rank"] for c in state.ambiguity_candidates], [1, 2, 3])
+
+    def test_communicative_closure_requires_reason(self) -> None:
+        state = ProofState(ingress_text="x", ambiguity_outcome="resolved", ambiguity_reason="")
+        apply_communicative_closure(state)
+        self.assertFalse(state.communicative_closed)
+
+    def test_singular_conceptual_closure_requires_non_empty_tokens(self) -> None:
+        state = ProofState(
+            ingress_text="   ",
+            normalized_text="   ",
+            singular_informational_closed=True,
+        )
+        apply_singular_conceptual_closure(state)
+        self.assertFalse(state.singular_conceptual_closed)
+
+    def test_emit_singular_trace_captures_current_closure_flags(self) -> None:
+        state = ProofState(
+            ingress_text="x",
+            singular_perceptual_closed=True,
+            singular_informational_closed=False,
+            singular_conceptual_closed=True,
+        )
+        emit_singular_trace(state)
+        self.assertEqual(state.trace_chain[-1]["event"], "singular_trace_emitted")
+        self.assertEqual(
+            state.trace_chain[-1]["payload"],
+            {"perceptual": True, "informational": False, "conceptual": True},
+        )
+
+    def test_verify_weight_legality_requires_closed_weight(self) -> None:
+        state = ProofState(ingress_text="x", weight_closed=False, weight_label="fa3ala")
+        self.assertFalse(verify_weight_legality(state))
 
     def test_proposition_closure_requires_composition_and_communication(self) -> None:
         state = ProofState(ingress_text="x", composition={"subject": "x"}, communicative_closed=False)
