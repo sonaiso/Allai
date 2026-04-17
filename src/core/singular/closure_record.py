@@ -88,11 +88,7 @@ def assemble_singular_closure_record(state: ProofState) -> ProofState:
         "sublayer_records": state.singular_rank_sublayers,
         "hierarchical_evidence": state.singular_level_evidence,
         "hierarchical_blockers": {
-            rank: {
-                "rank": rank,
-                "blocker": _resolve_rank_blocker(state, rank),
-            }
-            for rank in list(rank_states.keys()) + ["unified_closure"]
+            rank: _resolve_rank_blocker(state, rank) for rank in (*rank_states.keys(), "unified_closure")
         },
         "hierarchical_trace": hierarchical_trace,
         "final_decision": decision,
