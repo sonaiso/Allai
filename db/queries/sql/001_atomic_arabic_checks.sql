@@ -102,3 +102,68 @@ CROSS JOIN LATERAL score_root_pattern(r.id, p.id) s
 WHERE r.code IN ('KTB', 'DRS', 'QWL')
   AND p.code IN ('FA3ALA', 'FA33ALA', 'FAA3ALA', 'AF3ALA', 'TAFA33ALA', 'ISTAF3ALA', 'FAA3IL', 'MAF3UL', 'MAF3AL', 'TAF3IL')
 ORDER BY r.code, s.total_score DESC, p.code;
+
+-- ح. عرض وحدات الحركة الذرية (المرحلة الأولى)
+SELECT
+    code,
+    name_ar,
+    class,
+    vowel_quality,
+    length_weight,
+    inflectional_role,
+    derivational_role,
+    phonological_cost,
+    cognitive_cost
+FROM haraka_units
+ORDER BY code;
+
+-- ط. عرض انتقالات الحركة الشرعية
+SELECT
+    h_from.code AS from_haraka,
+    h_to.code AS to_haraka,
+    ht.transition_type,
+    ht.legality,
+    ht.cost_delta,
+    ht.proof_rule
+FROM haraka_transitions ht
+JOIN haraka_units h_from ON h_from.id = ht.from_haraka_id
+JOIN haraka_units h_to ON h_to.id = ht.to_haraka_id
+ORDER BY h_from.code, h_to.code, ht.transition_type;
+
+-- ي. عرض الفونيمات بصيغة الأصل/التجسد
+SELECT
+    abstract_phoneme_code,
+    symbol_ar,
+    unicode_repr,
+    articulation_place_rank,
+    articulation_manner_rank,
+    voiced,
+    emphatic,
+    continuant,
+    doubling_cost
+FROM phoneme_units
+ORDER BY articulation_place_rank, abstract_phoneme_code;
+
+-- ك. عرض رتب المخارج العددية الموسعة
+SELECT
+    code,
+    arabic_name,
+    name_ar,
+    rank_order,
+    rank_numeric,
+    zone,
+    openness_degree,
+    effort_score
+FROM articulation_places
+ORDER BY rank_order;
+
+-- ل. عرض قوالب المقطع
+SELECT
+    code,
+    pattern_shape,
+    mora_count,
+    closure_degree,
+    articulatory_cost,
+    cognitive_cost
+FROM syllable_templates
+ORDER BY mora_count, closure_degree;
