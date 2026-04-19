@@ -20,6 +20,170 @@ ON CONFLICT (code) DO NOTHING;
 
 COMMIT;
 
+-- 3.13 مواءمة حقول articulation_places الموسعة للمرحلة الأولى
+BEGIN;
+
+UPDATE articulation_places ap
+SET
+    name_ar = COALESCE(ap.name_ar, ap.arabic_name),
+    rank_numeric = COALESCE(ap.rank_numeric, ap.rank_order),
+    zone = COALESCE(
+        ap.zone,
+        CASE ap.code
+            WHEN 'GLOTTAL' THEN 'laryngeal'::articulation_zone_enum
+            WHEN 'PHARYNGEAL' THEN 'pharyngeal'::articulation_zone_enum
+            WHEN 'UVULAR' THEN 'uvular'::articulation_zone_enum
+            WHEN 'VELAR' THEN 'velar'::articulation_zone_enum
+            WHEN 'PALATAL' THEN 'palatal'::articulation_zone_enum
+            WHEN 'POSTALVEOLAR' THEN 'alveolar'::articulation_zone_enum
+            WHEN 'ALVEOLAR' THEN 'alveolar'::articulation_zone_enum
+            WHEN 'DENTAL' THEN 'dental'::articulation_zone_enum
+            WHEN 'LABIODENTAL' THEN 'labial'::articulation_zone_enum
+            WHEN 'BILABIAL' THEN 'labial'::articulation_zone_enum
+            WHEN 'NASAL_CAVITY' THEN 'nasal'::articulation_zone_enum
+            ELSE NULL
+        END
+    ),
+    -- distance_from_core is normalized approximately to [0..1] in this model.
+    -- 0.50 factor keeps openness in a stable [~0.5..1] band before clipping.
+    -- distance_from_core في هذا النموذج مُطَبَّع تقريبًا ضمن [0..1].
+    -- عامل 0.50 يحافظ على مدى انفتاح مستقر [~0.5..1] قبل القص.
+    openness_degree = COALESCE(ap.openness_degree, LEAST(1.00, GREATEST(0.00, 1.00 - (ap.distance_from_core * 0.50)))),
+    -- effort_score uses a direct 1:1 mapping from distance_from_core (after clipping).
+    -- Minimum floor 0.10 prevents a physically implausible zero-effort articulation.
+    -- effort_score يعتمد علاقة 1:1 مع distance_from_core (بعد القص) لأن البعد هنا يمثل كلفة جهد مباشرة.
+    -- أرضية الجهد = 0.10 حتى لا يظهر مخرج بصفر جهد.
+    effort_score = COALESCE(ap.effort_score, LEAST(1.00, GREATEST(0.10, ap.distance_from_core)));
+WHERE
+    ap.name_ar IS NULL
+    OR ap.rank_numeric IS NULL
+    OR ap.zone IS NULL
+    OR ap.openness_degree IS NULL
+    OR ap.effort_score IS NULL;
+
+COMMIT;
+
+-- 3.14 جدول haraka_units (الذرات الحركية)
+BEGIN;
+
+INSERT INTO haraka_units (
+    code, name_ar, class, vowel_quality, length_weight, closure_effect, openness_effect,
+    inflectional_role, derivational_role, phonological_cost, cognitive_cost,
+    can_combine_with_shadda, can_form_syllable_peak, transition_group, notes
+)
+VALUES
+('FATHA', 'فتحة', 'short', 'a', 1.00, 0.35, 0.85, 'none', 'original', 0.90, 0.85, TRUE, TRUE, 'short_open', 'حركة قصيرة'),
+('DAMMA', 'ضمة', 'short', 'u', 1.00, 0.55, 0.65, 'none', 'original', 1.00, 0.90, TRUE, TRUE, 'short_round', 'حركة قصيرة'),
+('KASRA', 'كسرة', 'short', 'i', 1.00, 0.45, 0.75, 'none', 'original', 0.95, 0.88, TRUE, TRUE, 'short_front', 'حركة قصيرة'),
+('SUKUN', 'سكون', 'sukun', 'zero', 0.00, 0.95, 0.05, 'jazm', 'none', 0.85, 0.95, FALSE, FALSE, 'closure_stop', 'انغلاق مقطعي'),
+('ALIF_MADD', 'ألف مد', 'madd', 'long_a', 2.00, 0.30, 0.90, 'none', 'augmentive', 0.95, 0.85, FALSE, TRUE, 'long_open', 'مد'),
+('WAW_MADD', 'واو مد', 'madd', 'long_u', 2.00, 0.60, 0.55, 'none', 'augmentive', 1.05, 0.95, FALSE, TRUE, 'long_round', 'مد'),
+('YA_MADD', 'ياء مد', 'madd', 'long_i', 2.00, 0.50, 0.65, 'none', 'augmentive', 1.00, 0.92, FALSE, TRUE, 'long_front', 'مد'),
+('TANWEEN_FATH', 'تنوين فتح', 'tanween', 'tanween_fath', 1.20, 0.40, 0.80, 'nasb', 'inflectional', 1.10, 1.00, FALSE, TRUE, 'nunation_open', 'تنوين'),
+('TANWEEN_DAMM', 'تنوين ضم', 'tanween', 'tanween_damm', 1.20, 0.60, 0.60, 'raf', 'inflectional', 1.15, 1.05, FALSE, TRUE, 'nunation_round', 'تنوين'),
+('TANWEEN_KASR', 'تنوين كسر', 'tanween', 'tanween_kasr', 1.20, 0.50, 0.70, 'jarr', 'inflectional', 1.12, 1.02, FALSE, TRUE, 'nunation_front', 'تنوين'),
+('SHADDA_FATHA', 'شدة+فتحة', 'shadda', 'a', 1.40, 0.70, 0.50, 'none', 'derivational', 1.35, 1.10, FALSE, TRUE, 'geminated_open', 'شدة مركبة'),
+('SHADDA_DAMMA', 'شدة+ضمة', 'shadda', 'u', 1.40, 0.78, 0.42, 'none', 'derivational', 1.42, 1.15, FALSE, TRUE, 'geminated_round', 'شدة مركبة'),
+('SHADDA_KASRA', 'شدة+كسرة', 'shadda', 'i', 1.40, 0.72, 0.48, 'none', 'derivational', 1.38, 1.12, FALSE, TRUE, 'geminated_front', 'شدة مركبة'),
+('SHADDA_SUKUN', 'شدة+سكون', 'shadda', 'zero', 1.10, 0.92, 0.10, 'jazm', 'derivational', 1.50, 1.25, FALSE, FALSE, 'geminated_closed', 'شدة مركبة')
+ON CONFLICT (code) DO NOTHING;
+
+COMMIT;
+
+-- 3.15 جدول haraka_transitions (الانتقالات الأساسية)
+BEGIN;
+
+INSERT INTO haraka_transitions (
+    from_haraka_id, to_haraka_id, transition_type, trigger_condition, cost_delta, legality, proof_rule
+)
+VALUES
+(
+    (SELECT id FROM haraka_units WHERE code='FATHA'),
+    (SELECT id FROM haraka_units WHERE code='ALIF_MADD'),
+    'phonological',
+    'امتداد الفتحة في سياق مدّي',
+    0.40,
+    TRUE,
+    'a -> aa'
+),
+(
+    (SELECT id FROM haraka_units WHERE code='DAMMA'),
+    (SELECT id FROM haraka_units WHERE code='WAW_MADD'),
+    'phonological',
+    'امتداد الضمة في سياق مدّي',
+    0.35,
+    TRUE,
+    'u -> uu'
+),
+(
+    (SELECT id FROM haraka_units WHERE code='KASRA'),
+    (SELECT id FROM haraka_units WHERE code='YA_MADD'),
+    'phonological',
+    'امتداد الكسرة في سياق مدّي',
+    0.35,
+    TRUE,
+    'i -> ii'
+),
+(
+    (SELECT id FROM haraka_units WHERE code='SUKUN'),
+    (SELECT id FROM haraka_units WHERE code='FATHA'),
+    'phonological',
+    'تحريك الساكن عند الوصل',
+    0.20,
+    TRUE,
+    'sukun -> short_vowel_on_link'
+),
+(
+    (SELECT id FROM haraka_units WHERE code='FATHA'),
+    (SELECT id FROM haraka_units WHERE code='TANWEEN_FATH'),
+    'inflectional',
+    'تحويل الحركة إلى تنوين نصب',
+    0.10,
+    TRUE,
+    'lexical -> inflectional'
+)
+ON CONFLICT (from_haraka_id, to_haraka_id, transition_type) DO NOTHING;
+
+COMMIT;
+
+-- 3.16 جدول phoneme_units (عينة معيارية أولى)
+BEGIN;
+
+INSERT INTO phoneme_units (
+    symbol_ar, unicode_repr, abstract_phoneme_code, articulation_place_rank, articulation_manner_rank,
+    voiced, emphatic, continuant, root_eligible, augmentation_eligible, doubling_cost, adjacency_constraints, notes
+)
+VALUES
+('ك', 'U+0643', 'PH_KAF', 4, 1, FALSE, FALSE, FALSE, TRUE, TRUE, 1.00, '{"max_cluster": 2}'::jsonb, 'كاف'),
+('ت', 'U+062A', 'PH_TA', 8, 1, FALSE, FALSE, FALSE, TRUE, TRUE, 0.92, '{"max_cluster": 2}'::jsonb, 'تاء'),
+('ب', 'U+0628', 'PH_BA', 10, 1, TRUE, FALSE, FALSE, TRUE, TRUE, 0.90, '{"max_cluster": 2}'::jsonb, 'باء'),
+('د', 'U+062F', 'PH_DAL', 8, 1, TRUE, FALSE, FALSE, TRUE, TRUE, 0.90, '{"max_cluster": 2}'::jsonb, 'دال'),
+('ر', 'U+0631', 'PH_RA', 7, 5, TRUE, FALSE, TRUE, TRUE, TRUE, 0.98, '{"max_cluster": 2}'::jsonb, 'راء'),
+('س', 'U+0633', 'PH_SIN', 7, 2, FALSE, FALSE, TRUE, TRUE, TRUE, 0.94, '{"max_cluster": 2}'::jsonb, 'سين'),
+('ق', 'U+0642', 'PH_QAF', 3, 1, FALSE, FALSE, FALSE, TRUE, TRUE, 1.15, '{"max_cluster": 2}'::jsonb, 'قاف'),
+('و', 'U+0648', 'PH_WAW', 10, 6, TRUE, FALSE, TRUE, TRUE, TRUE, 1.02, '{"glide": true}'::jsonb, 'واو'),
+('ل', 'U+0644', 'PH_LAM', 7, 4, TRUE, FALSE, TRUE, TRUE, TRUE, 0.90, '{"max_cluster": 2}'::jsonb, 'لام'),
+('م', 'U+0645', 'PH_MIM', 10, 3, TRUE, FALSE, TRUE, TRUE, TRUE, 0.94, '{"nasal": true}'::jsonb, 'ميم')
+ON CONFLICT (abstract_phoneme_code) DO NOTHING;
+
+COMMIT;
+
+-- 3.17 جدول syllable_templates
+BEGIN;
+
+INSERT INTO syllable_templates (
+    code, pattern_shape, mora_count, closure_degree, articulatory_cost, cognitive_cost, legality_rule, notes
+)
+VALUES
+('CV', 'CV', 1, 0.30, 1.00, 1.20, 'basic_open', 'مقطع خفيف'),
+('CVV', 'CVV', 2, 0.45, 1.25, 1.25, 'long_nucleus', 'مقطع ممدود'),
+('CVC', 'CVC', 2, 0.70, 1.35, 1.30, 'single_coda', 'مقطع مغلق'),
+('CVVC', 'CVVC', 3, 0.78, 1.60, 1.35, 'long_nucleus_with_coda', 'مقطع ثقيل'),
+('CVCC', 'CVCC', 3, 0.90, 1.85, 1.45, 'complex_coda_restricted', 'مقطع أثقل')
+ON CONFLICT (code) DO NOTHING;
+
+COMMIT;
+
 -- 3.9 جدول الجذور roots
 BEGIN;
 

@@ -536,4 +536,193 @@ SELECT
 FROM components c;
 $$;
 
+-- =========================================================
+-- 14. PHASE-1 (ADDITIVE) TYPES AND TABLES
+-- =========================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'haraka_class_enum') THEN
+        CREATE TYPE haraka_class_enum AS ENUM (
+            'short',
+            'sukun',
+            'madd',
+            'tanween',
+            'shadda',
+            'inflectional_primary',
+            'inflectional_secondary'
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'haraka_vowel_quality_enum') THEN
+        CREATE TYPE haraka_vowel_quality_enum AS ENUM (
+            'a',
+            'i',
+            'u',
+            'zero',
+            'long_a',
+            'long_i',
+            'long_u',
+            'tanween_fath',
+            'tanween_damm',
+            'tanween_kasr'
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'haraka_inflectional_role_enum') THEN
+        CREATE TYPE haraka_inflectional_role_enum AS ENUM (
+            'raf',
+            'nasb',
+            'jarr',
+            'jazm',
+            'none'
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'haraka_derivational_role_enum') THEN
+        CREATE TYPE haraka_derivational_role_enum AS ENUM (
+            'original',
+            'derivational',
+            'augmentive',
+            'transformational',
+            'none'
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'haraka_transition_type_enum') THEN
+        CREATE TYPE haraka_transition_type_enum AS ENUM (
+            'phonological',
+            'morphological',
+            'inflectional',
+            'derivational'
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'articulation_zone_enum') THEN
+        CREATE TYPE articulation_zone_enum AS ENUM (
+            'laryngeal',
+            'pharyngeal',
+            'uvular',
+            'velar',
+            'palatal',
+            'alveolar',
+            'dental',
+            'labial',
+            'nasal',
+            'glide'
+        );
+    END IF;
+END
+$$;
+
+CREATE TABLE IF NOT EXISTS haraka_units (
+    id                          BIGSERIAL PRIMARY KEY,
+    code                        VARCHAR(32) NOT NULL UNIQUE,
+    name_ar                     VARCHAR(64) NOT NULL,
+    class                       haraka_class_enum NOT NULL,
+    vowel_quality               haraka_vowel_quality_enum NOT NULL,
+    length_weight               NUMERIC(4,2) NOT NULL CHECK (length_weight >= 0 AND length_weight <= 3.00),
+    closure_effect              NUMERIC(4,2) NOT NULL CHECK (closure_effect >= 0 AND closure_effect <= 1.00),
+    openness_effect             NUMERIC(4,2) NOT NULL CHECK (openness_effect >= 0 AND openness_effect <= 1.00),
+    inflectional_role           haraka_inflectional_role_enum NOT NULL DEFAULT 'none',
+    derivational_role           haraka_derivational_role_enum NOT NULL DEFAULT 'none',
+    phonological_cost           NUMERIC(5,2) NOT NULL CHECK (phonological_cost >= 0),
+    cognitive_cost              NUMERIC(5,2) NOT NULL CHECK (cognitive_cost >= 0),
+    can_combine_with_shadda     BOOLEAN NOT NULL DEFAULT FALSE,
+    can_form_syllable_peak      BOOLEAN NOT NULL DEFAULT FALSE,
+    transition_group            VARCHAR(32),
+    notes                       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS haraka_transitions (
+    id                  BIGSERIAL PRIMARY KEY,
+    from_haraka_id      BIGINT NOT NULL REFERENCES haraka_units(id) ON DELETE CASCADE,
+    to_haraka_id        BIGINT NOT NULL REFERENCES haraka_units(id) ON DELETE CASCADE,
+    transition_type     haraka_transition_type_enum NOT NULL,
+    trigger_condition   TEXT,
+    cost_delta          NUMERIC(5,2) NOT NULL DEFAULT 0,
+    legality            BOOLEAN NOT NULL DEFAULT TRUE,
+    proof_rule          VARCHAR(128),
+    UNIQUE (from_haraka_id, to_haraka_id, transition_type)
+);
+
+CREATE TABLE IF NOT EXISTS phoneme_units (
+    id                          BIGSERIAL PRIMARY KEY,
+    symbol_ar                   VARCHAR(8) NOT NULL,
+    unicode_repr                VARCHAR(32) NOT NULL,
+    abstract_phoneme_code       VARCHAR(32) NOT NULL UNIQUE,
+    articulation_place_rank     INTEGER NOT NULL CHECK (articulation_place_rank > 0),
+    articulation_manner_rank    INTEGER NOT NULL CHECK (articulation_manner_rank > 0),
+    voiced                      BOOLEAN NOT NULL DEFAULT FALSE,
+    emphatic                    BOOLEAN NOT NULL DEFAULT FALSE,
+    continuant                  BOOLEAN NOT NULL DEFAULT FALSE,
+    root_eligible               BOOLEAN NOT NULL DEFAULT TRUE,
+    augmentation_eligible       BOOLEAN NOT NULL DEFAULT TRUE,
+    doubling_cost               NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (doubling_cost >= 0),
+    adjacency_constraints       JSONB NOT NULL DEFAULT '{}'::jsonb,
+    notes                       TEXT
+);
+
+ALTER TABLE articulation_places
+    ADD COLUMN IF NOT EXISTS name_ar VARCHAR(64),
+    ADD COLUMN IF NOT EXISTS rank_numeric INTEGER,
+    ADD COLUMN IF NOT EXISTS zone articulation_zone_enum,
+    ADD COLUMN IF NOT EXISTS openness_degree NUMERIC(4,2),
+    ADD COLUMN IF NOT EXISTS effort_score NUMERIC(4,2);
+
+COMMENT ON COLUMN articulation_places.name_ar IS 'التسمية العربية المكافئة لحقل arabic_name.';
+COMMENT ON COLUMN articulation_places.rank_numeric IS 'رتبة رقمية معيارية للمخرج قابلة للحساب.';
+COMMENT ON COLUMN articulation_places.zone IS 'النطاق التجريدي للمخرج ضمن تصنيف المرحلة الأولى.';
+COMMENT ON COLUMN articulation_places.openness_degree IS 'درجة الانفتاح [0..1] للمخرج.';
+COMMENT ON COLUMN articulation_places.effort_score IS 'درجة الجهد النطقي [0..1] للمخرج.';
+
+COMMENT ON COLUMN haraka_units.length_weight IS 'وزن طولي معياري [0..3]: 0 سكون، 1 قصير، 2 مد، 3 حد علوي مركب.';
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'chk_articulation_places_openness_degree'
+          AND conrelid = 'articulation_places'::regclass
+    ) THEN
+        ALTER TABLE articulation_places
+            ADD CONSTRAINT chk_articulation_places_openness_degree
+            CHECK (openness_degree IS NULL OR (openness_degree >= 0 AND openness_degree <= 1.00));
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'chk_articulation_places_effort_score'
+          AND conrelid = 'articulation_places'::regclass
+    ) THEN
+        ALTER TABLE articulation_places
+            ADD CONSTRAINT chk_articulation_places_effort_score
+            CHECK (effort_score IS NULL OR (effort_score >= 0 AND effort_score <= 1.00));
+    END IF;
+END
+$$;
+
+CREATE TABLE IF NOT EXISTS syllable_templates (
+    id                  BIGSERIAL PRIMARY KEY,
+    code                VARCHAR(32) NOT NULL UNIQUE,
+    pattern_shape       VARCHAR(16) NOT NULL,
+    mora_count          INTEGER NOT NULL CHECK (mora_count > 0),
+    closure_degree      NUMERIC(4,2) NOT NULL CHECK (closure_degree >= 0 AND closure_degree <= 1.00),
+    articulatory_cost   NUMERIC(5,2) NOT NULL CHECK (articulatory_cost >= 0),
+    cognitive_cost      NUMERIC(5,2) NOT NULL CHECK (cognitive_cost >= 0),
+    legality_rule       TEXT,
+    notes               TEXT
+);
+
+CREATE TABLE IF NOT EXISTS syllable_instances (
+    id                  BIGSERIAL PRIMARY KEY,
+    template_id         BIGINT NOT NULL REFERENCES syllable_templates(id) ON DELETE CASCADE,
+    onset_phoneme_id    BIGINT REFERENCES phoneme_units(id),
+    nucleus_haraka_id   BIGINT NOT NULL REFERENCES haraka_units(id),
+    coda_phoneme_id     BIGINT REFERENCES phoneme_units(id),
+    instance_label      VARCHAR(64),
+    legality            BOOLEAN NOT NULL DEFAULT TRUE,
+    notes               TEXT
+);
+
 COMMIT;
