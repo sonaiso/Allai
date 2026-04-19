@@ -179,11 +179,21 @@ class AdditionalCoverageTests(unittest.TestCase):
         apply_singular_identity_closure(state)
         self.assertEqual(state.singular_level_evidence["identity"]["higher_analysis"]["word_class"], "verb")
 
+    def test_identity_defaults_to_noun_without_verb_prefix(self) -> None:
+        state = ProofState(
+            ingress_text="كتاب واضح",
+            normalized_text="كتاب واضح",
+            singular_possibility_closed=True,
+        )
+        apply_singular_identity_closure(state)
+        self.assertEqual(state.singular_level_evidence["identity"]["higher_analysis"]["word_class"], "noun")
+
     def test_mizan_marks_empty_input_as_not_closed(self) -> None:
         state = ProofState(ingress_text="   ", normalized_text="   ")
         apply_mizan_closure(state)
         self.assertIsNone(state.weight_label)
         self.assertFalse(state.weight_closed)
+        self.assertEqual(state.trace_chain[-1]["payload"]["token_count"], 0)
 
     def test_unified_closure_rejects_when_no_required_ranks_are_closed(self) -> None:
         state = ProofState(ingress_text="x")
@@ -211,6 +221,18 @@ class AdditionalCoverageTests(unittest.TestCase):
         assemble_singular_closure_record(state)
         self.assertEqual(state.singular_closure_record["final_decision"], "COMPLETE")
         self.assertEqual(state.singular_closure_record["final_decision_reason"], "unified_closure_complete_and_composed")
+
+    def test_closure_record_does_not_mark_complete_without_composition(self) -> None:
+        state = ProofState(
+            ingress_text="x",
+            singular_final_decision="PASS",
+            singular_final_decision_reason="all_required_ranks_closed",
+            ready_for_composition=True,
+            composition={},
+        )
+        assemble_singular_closure_record(state)
+        self.assertEqual(state.singular_closure_record["final_decision"], "PASS")
+        self.assertEqual(state.singular_closure_record["final_decision_reason"], "all_required_ranks_closed")
 
     def test_closure_record_prefers_rank_blocker_when_present(self) -> None:
         state = ProofState(
