@@ -171,25 +171,30 @@ class AdditionalCoverageTests(unittest.TestCase):
         self.assertEqual(state.singular_level_blockers["logical_classificatory"], "prior_rank_incomplete:weight")
 
     def test_identity_detects_verb_word_class_from_prefix(self) -> None:
+        verb_text = "يكتب بسرعة"
         state = ProofState(
-            ingress_text="يكتب بسرعة",
-            normalized_text="يكتب بسرعة",
+            ingress_text=verb_text,
+            normalized_text=verb_text,
             singular_possibility_closed=True,
         )
+        self.assertTrue(state.normalized_text.split()[0].startswith(("ي", "ت")))
         apply_singular_identity_closure(state)
         self.assertEqual(state.singular_level_evidence["identity"]["higher_analysis"]["word_class"], "verb")
 
     def test_identity_defaults_to_noun_without_verb_prefix(self) -> None:
+        noun_text = "كتاب واضح"
         state = ProofState(
-            ingress_text="كتاب واضح",
-            normalized_text="كتاب واضح",
+            ingress_text=noun_text,
+            normalized_text=noun_text,
             singular_possibility_closed=True,
         )
+        self.assertFalse(state.normalized_text.split()[0].startswith(("ي", "ت")))
         apply_singular_identity_closure(state)
         self.assertEqual(state.singular_level_evidence["identity"]["higher_analysis"]["word_class"], "noun")
 
     def test_mizan_marks_empty_input_as_not_closed(self) -> None:
-        state = ProofState(ingress_text="   ", normalized_text="   ")
+        whitespace_input = "   "
+        state = ProofState(ingress_text=whitespace_input, normalized_text=whitespace_input)
         apply_mizan_closure(state)
         self.assertIsNone(state.weight_label)
         self.assertFalse(state.weight_closed)
