@@ -16,7 +16,13 @@ from core.ingress.unicode_ingress import apply_unicode_ingress
 from core.model import ProofState
 from core.proposition.proposition_closure import apply_proposition_closure
 from core.singular.closure_contracts import SingularClosureError, enforce_singular_closure
+from core.singular.closure_record import assemble_singular_closure_record
 from core.singular.conceptual_closure import apply_singular_conceptual_closure
+from core.singular.designation_closure import apply_singular_designation_closure
+from core.singular.identity_closure import apply_singular_identity_closure
+from core.singular.logical_classificatory_closure import apply_singular_logical_classificatory_closure
+from core.singular.possibility_closure import apply_singular_possibility_closure
+from core.singular.unified_closure import apply_singular_unified_closure
 from core.trace.chain_validation import validate_trace_chain
 from core.trace.replay_engine import replay_digest
 from core.trace.singular_trace import emit_singular_trace
@@ -145,6 +151,79 @@ class AdditionalCoverageTests(unittest.TestCase):
         state = ProofState(ingress_text="x", composition={"subject": "x"}, communicative_closed=False)
         apply_proposition_closure(state)
         self.assertFalse(state.proposition_closed)
+
+    def test_designation_rejects_when_existence_not_closed(self) -> None:
+        state = ProofState(ingress_text="x", singular_existence_closed=False)
+        apply_singular_designation_closure(state)
+        self.assertFalse(state.singular_designation_closed)
+        self.assertEqual(state.singular_level_blockers["designation"], "prior_level_incomplete:existence")
+
+    def test_possibility_rejects_when_designation_not_closed(self) -> None:
+        state = ProofState(ingress_text="x", singular_designation_closed=False)
+        apply_singular_possibility_closure(state)
+        self.assertFalse(state.singular_possibility_closed)
+        self.assertEqual(state.singular_level_blockers["possibility"], "prior_level_incomplete:designation")
+
+    def test_logical_classificatory_rejects_when_weight_rank_incomplete(self) -> None:
+        state = ProofState(ingress_text="x", singular_weight_closed=False)
+        apply_singular_logical_classificatory_closure(state)
+        self.assertFalse(state.singular_logical_classificatory_closed)
+        self.assertEqual(state.singular_level_blockers["logical_classificatory"], "prior_rank_incomplete:weight")
+
+    def test_identity_detects_verb_word_class_from_prefix(self) -> None:
+        state = ProofState(
+            ingress_text="يكتب بسرعة",
+            normalized_text="يكتب بسرعة",
+            singular_possibility_closed=True,
+        )
+        apply_singular_identity_closure(state)
+        self.assertEqual(state.singular_level_evidence["identity"]["higher_analysis"]["word_class"], "verb")
+
+    def test_mizan_marks_empty_input_as_not_closed(self) -> None:
+        state = ProofState(ingress_text="   ", normalized_text="   ")
+        apply_mizan_closure(state)
+        self.assertIsNone(state.weight_label)
+        self.assertFalse(state.weight_closed)
+
+    def test_unified_closure_rejects_when_no_required_ranks_are_closed(self) -> None:
+        state = ProofState(ingress_text="x")
+        apply_singular_unified_closure(state)
+        self.assertEqual(state.singular_final_decision, "REJECT")
+        self.assertFalse(state.ready_for_composition)
+
+    def test_closure_record_derives_pass_and_suspend_without_precomputed_decision(self) -> None:
+        pass_state = ProofState(ingress_text="x", singular_unified_closure_closed=True)
+        assemble_singular_closure_record(pass_state)
+        self.assertEqual(pass_state.singular_closure_record["final_decision"], "PASS")
+
+        suspend_state = ProofState(ingress_text="x", singular_unified_closure_closed=False)
+        assemble_singular_closure_record(suspend_state)
+        self.assertEqual(suspend_state.singular_closure_record["final_decision"], "SUSPEND")
+
+    def test_closure_record_marks_complete_when_composition_exists(self) -> None:
+        state = ProofState(
+            ingress_text="x",
+            singular_final_decision="PASS",
+            singular_final_decision_reason="all_required_ranks_closed",
+            ready_for_composition=True,
+            composition={"subject": "x"},
+        )
+        assemble_singular_closure_record(state)
+        self.assertEqual(state.singular_closure_record["final_decision"], "COMPLETE")
+        self.assertEqual(state.singular_closure_record["final_decision_reason"], "unified_closure_complete_and_composed")
+
+    def test_closure_record_prefers_rank_blocker_when_present(self) -> None:
+        state = ProofState(
+            ingress_text="x",
+            singular_final_decision="SUSPEND",
+            singular_level_blockers={"identity": "identity_unresolved"},
+            singular_rank_blockers={"identity": "rank_specific_identity_blocker"},
+        )
+        assemble_singular_closure_record(state)
+        self.assertEqual(
+            state.singular_closure_record["hierarchical_blockers"]["identity"],
+            "rank_specific_identity_blocker",
+        )
 
 
 if __name__ == "__main__":
