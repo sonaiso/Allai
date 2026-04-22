@@ -8,6 +8,15 @@
 - Enable `concept_first` as a gated experimental/benchmarking mode in v1.
 - Keep `RealityAlignment` required for trace and analysis, but non-blocking for final acceptance in v1.
 
+## Authority alignment decision (v1)
+
+- Reference map: `docs/foundations/reference_authority_map_v1.md`.
+- Governing authorities for executable contracts and gate law are ordered as:
+  - A: _Thinking_ (foundational cognition)
+  - B: _Islamic Personality Part 1_ (structural concept/personality bridge)
+  - C: _Islamic Personality Part 3 / Usul_ (normative judgement, dalala, hujjiyya, tarjih)
+- Interpretive/supportive authorities (Qur'an, Heidegger, Wittgenstein) do not independently create mandatory executable blockers unless explicitly promoted into contracts/specs.
+
 ## Glossary
 
 - **PreReality Gate**: derives minimal pre-language observables from text.
@@ -55,3 +64,5 @@ In v1:
 - These are trace + validation oriented.
 - `RealityAlignment` remains non-blocking for final acceptance.
 - `concept_first` mode may enforce full pre-language trace coverage as a gated architecture proof mode.
+- Critical new foundational layers are blocking in `concept_first`.
+- In `legacy_text_first`, those layers remain trace-required and non-blocking for v1 acceptance.
