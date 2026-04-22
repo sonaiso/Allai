@@ -9,6 +9,15 @@ from core.ambiguity.conflict_resolution import resolve_ambiguity_conflicts
 from core.ambiguity.detection import detect_ambiguity
 from core.ambiguity.ranking import rank_ambiguity_candidates
 from core.communication.communicative_closure import apply_communicative_closure
+from arabic_engine.foundational.gates import (
+    apply_alignment_gate,
+    apply_naming_gate,
+    apply_percept_gate,
+    apply_pre_reality_gate,
+    apply_proto_concept_gate,
+)
+from arabic_engine.foundational.layers import apply_ontological_property_layer
+from arabic_engine.symbolic.encoding import apply_symbolic_encoding_layer
 from core.composition.role_distribution import apply_role_distribution_composition
 from core.gates.validator import GateViolationError
 from core.ingress.admissibility_pre_u0 import apply_admissibility_pre_u0
@@ -32,6 +41,51 @@ from core.weight.weight_legality import verify_weight_legality
 
 
 class AdditionalCoverageTests(unittest.TestCase):
+    def test_pre_language_layers_populate_grouped_state(self) -> None:
+        state = ProofState(ingress_text="النص واضح")
+        apply_pre_reality_gate(state)
+        apply_percept_gate(state)
+        apply_proto_concept_gate(state)
+        apply_alignment_gate(state)
+        apply_naming_gate(state)
+        apply_ontological_property_layer(state)
+        apply_symbolic_encoding_layer(state)
+
+        self.assertIn("pre_language", state.conceptual_state)
+        self.assertIn("ontological_property_layer", state.conceptual_state)
+        self.assertIn("symbolic_encoding_layer", state.symbolic_state)
+        self.assertTrue(any(item["event"] == "alignment_gate" for item in state.trace_chain))
+
+    def test_concept_first_requires_pre_language_trace_for_judgement_validation(self) -> None:
+        state = ProofState(ingress_text="x", processing_mode="concept_first")
+        required_events = [
+            "unicode_ingress",
+            "admissibility_checked",
+            "singular_existence_closure",
+            "singular_designation_closure",
+            "singular_possibility_closure",
+            "singular_identity_closure",
+            "singular_relational_closure",
+            "mizan_closure",
+            "singular_weight_handoff_closure",
+            "singular_logical_classificatory_closure",
+            "singular_unified_closure",
+            "singular_closure_record_assembled",
+            "composition_applied",
+            "ambiguity_detected",
+            "ambiguity_ranked",
+            "ambiguity_outcome",
+            "communicative_closure",
+            "proposition_closure",
+        ]
+        state.trace_chain = [
+            {"event_id": idx, "event": event, "payload": {}, "timestamp": "2026-01-01T00:00:00+00:00"}
+            for idx, event in enumerate(required_events, start=1)
+        ]
+        self.assertFalse(validate_trace_chain(state))
+        self.assertEqual(state.trace_chain[-1]["event"], "trace_chain_rejected")
+        self.assertIn("concept_first_missing_pre_language_events", state.trace_chain[-1]["payload"]["reason"])
+
     def test_admissibility_allows_allowed_control_characters(self) -> None:
         state = ProofState(ingress_text="line1\nline2\tend\r")
         apply_unicode_ingress(state)

@@ -5,6 +5,15 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from arabic_engine.foundational.gates import (
+    apply_alignment_gate,
+    apply_naming_gate,
+    apply_percept_gate,
+    apply_pre_reality_gate,
+    apply_proto_concept_gate,
+)
+from arabic_engine.foundational.layers import apply_ontological_property_layer
+from arabic_engine.symbolic.encoding import apply_symbolic_encoding_layer
 from core.ambiguity.conflict_resolution import resolve_ambiguity_conflicts
 from core.ambiguity.detection import detect_ambiguity
 from core.ambiguity.ranking import rank_ambiguity_candidates
@@ -34,8 +43,16 @@ class EndToEndProofTests(unittest.TestCase):
     def test_end_to_end_proof_flow(self) -> None:
         state = ProofState(ingress_text="النص / واضح")
 
+        apply_pre_reality_gate(state)
+        apply_percept_gate(state)
+        apply_proto_concept_gate(state)
+        apply_alignment_gate(state)
+        apply_naming_gate(state)
+
         apply_unicode_ingress(state)
         apply_admissibility_pre_u0(state)
+        apply_ontological_property_layer(state)
+        apply_symbolic_encoding_layer(state)
 
         apply_singular_perceptual_closure(state)
         apply_singular_informational_closure(state)
@@ -70,6 +87,8 @@ class EndToEndProofTests(unittest.TestCase):
         self.assertIn("minimum_gate_snapshot", state.singular_closure_record)
         self.assertIn("deferred_analysis_snapshot", state.singular_closure_record)
         self.assertIn("unified_closure", state.singular_closure_record["minimum_gate_snapshot"])
+        self.assertIn("pre_language", state.conceptual_state)
+        self.assertIn("symbolic_encoding_layer", state.symbolic_state)
         self.assertEqual(digest_1, digest_2)
 
 

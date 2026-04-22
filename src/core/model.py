@@ -9,6 +9,7 @@ import unicodedata
 @dataclass
 class ProofState:
     ingress_text: str
+    processing_mode: str = "legacy_text_first"
     normalized_text: str = ""
     admissible: bool = False
 
@@ -57,6 +58,9 @@ class ProofState:
     communicative_closed: bool = False
     proposition_closed: bool = False
     judgement: Optional[str] = None
+
+    conceptual_state: Dict[str, Any] = field(default_factory=dict)
+    symbolic_state: Dict[str, Any] = field(default_factory=dict)
 
     trace_chain: List[Dict[str, Any]] = field(default_factory=list)
 
