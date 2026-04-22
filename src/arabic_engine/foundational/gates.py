@@ -39,7 +39,7 @@ def apply_pre_reality_gate(state: ProofState) -> ProofState:
 def apply_percept_gate(state: ProofState) -> ProofState:
     text = state.effective_text()
     percept_units: list[PerceptUnit] = []
-    token_index = 0
+    token_index = -1
     for char_index, char in enumerate(text):
         if char.isspace():
             continue
@@ -51,7 +51,7 @@ def apply_percept_gate(state: ProofState) -> ProofState:
                 surface=char,
                 normalized=unicodedata.normalize("NFKC", char),
                 unit_type=unit_type,
-                token_index=max(token_index - 1, 0),
+                token_index=max(token_index, 0),
                 char_index=char_index,
             )
         )
