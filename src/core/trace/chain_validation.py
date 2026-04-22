@@ -1,4 +1,5 @@
 from core.model import ProofState
+from arabic_engine.foundational.gates import validate_pre_language_trace
 
 
 _REQUIRED_EVENTS_FOR_JUDGEMENT = [
@@ -49,6 +50,20 @@ def validate_trace_chain(state: ProofState) -> bool:
     positions = [event_positions[event] for event in _REQUIRED_EVENTS_FOR_JUDGEMENT]
     if positions != sorted(positions):
         return _reject(state, "required_events_out_of_order")
+
+    pre_language_valid, pre_language_reason = validate_pre_language_trace(state)
+    state.conceptual_state.setdefault("pre_language", {})
+    state.conceptual_state["pre_language"]["trace_validation"] = {
+        "valid": pre_language_valid,
+        "reason": pre_language_reason,
+        "mode": state.processing_mode,
+    }
+    state.add_trace(
+        "pre_language_trace_validated",
+        {"valid": pre_language_valid, "reason": pre_language_reason, "mode": state.processing_mode},
+    )
+    if state.processing_mode == "concept_first" and not pre_language_valid:
+        return _reject(state, pre_language_reason)
 
     state.add_trace("trace_chain_validated", {})
     return True
