@@ -9,6 +9,7 @@ from core.composition.role_distribution import apply_role_distribution_compositi
 from core.gates.validator import GateViolationError
 from core.judgement.proposition_to_judgement import transition_proposition_to_judgement
 from core.model import ProofState
+from arabic_engine.language.minimal_complete_encoding import apply_minimal_complete_encoding_contract
 from core.singular.closure_record import assemble_singular_closure_record
 from core.singular.unified_closure import apply_singular_unified_closure
 
@@ -36,6 +37,7 @@ class ContractInvariantTests(unittest.TestCase):
         state.singular_logical_classificatory_closed = True
         apply_singular_unified_closure(state)
         assemble_singular_closure_record(state)
+        apply_minimal_complete_encoding_contract(state)
         with self.assertRaises(GateViolationError):
             apply_role_distribution_composition(state)
 

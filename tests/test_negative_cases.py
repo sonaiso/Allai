@@ -49,6 +49,7 @@ class NegativeCaseTests(unittest.TestCase):
             "singular_logical_classificatory_closure",
             "singular_unified_closure",
             "singular_closure_record_assembled",
+            "minimal_complete_encoding_contract",
             "composition_applied",
             "ambiguity_detected",
             "ambiguity_ranked",

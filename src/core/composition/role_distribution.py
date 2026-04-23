@@ -12,9 +12,22 @@ def apply_role_distribution_composition(state: ProofState) -> ProofState:
         state.add_trace("composition_rejected", {"reason": "insufficient_tokens_for_role_distribution"})
         raise GateViolationError("Composition requires at least two tokens for role distribution.")
 
+    minimal_encoding = state.symbolic_state.get("minimal_complete_encoding", {})
+    token_units = minimal_encoding.get("token_units", [])
     state.composition = {
         "subject": tokens[0],
         "predicate": " ".join(tokens[1:]),
+        "sentence_pattern": minimal_encoding.get("sentence_pattern"),
+        "role_graph": [
+            {
+                "token": unit["token"],
+                "token_index": unit["token_index"],
+                "governance_role": unit["governance_role"],
+                "directional_context": unit["directional_context"],
+                "hierarchical_context": unit["hierarchical_context"],
+            }
+            for unit in token_units
+        ],
     }
     state.add_trace("composition_applied", {"composition": state.composition})
     return state

@@ -17,6 +17,17 @@ def require_for_composition(state: ProofState) -> None:
         )
         raise GateViolationError("No composition without a complete singular closure record.")
 
+    minimal_encoding = state.symbolic_state.get("minimal_complete_encoding", {})
+    minimal_complete = bool(minimal_encoding.get("completeness", {}).get("complete"))
+    if not minimal_complete:
+        state.add_trace(
+            "composition_rejected",
+            {
+                "reason": "missing_or_incomplete_minimal_complete_encoding_contract",
+            },
+        )
+        raise GateViolationError("No composition without a complete minimal encoding contract.")
+
 
 def require_for_judgement(state: ProofState, trace_chain_valid: bool) -> None:
     ambiguity_ok = state.ambiguity_outcome in {"resolved", "suspended"} and bool(state.ambiguity_reason)
