@@ -17,7 +17,10 @@ from arabic_engine.foundational.gates import (
     apply_proto_concept_gate,
 )
 from arabic_engine.foundational.layers import apply_ontological_property_layer
-from arabic_engine.language.minimal_complete_encoding import apply_minimal_complete_encoding_contract
+from arabic_engine.language.minimal_complete_encoding import (
+    VALID_SENTENCE_PATTERNS,
+    apply_minimal_complete_encoding_contract,
+)
 from arabic_engine.symbolic.encoding import apply_symbolic_encoding_layer
 from core.composition.role_distribution import apply_role_distribution_composition
 from core.gates.validator import GateViolationError
@@ -216,7 +219,7 @@ class AdditionalCoverageTests(unittest.TestCase):
         encoding = state.symbolic_state["minimal_complete_encoding"]
         self.assertTrue(encoding["completeness"]["complete"])
         self.assertEqual(encoding["token_count"], 3)
-        self.assertIn(encoding["sentence_pattern"], {"nominal", "verbal", "prepositional"})
+        self.assertIn(encoding["sentence_pattern"], VALID_SENTENCE_PATTERNS)
         self.assertTrue(all("directional_context" in unit for unit in encoding["token_units"]))
 
     def test_composition_rejected_without_minimal_complete_encoding_contract(self) -> None:

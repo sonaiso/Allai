@@ -1,16 +1,36 @@
 from __future__ import annotations
 
+import unicodedata
+
 from core.model import ProofState
 
-_VERB_PREFIXES = ("ي", "ت")
+PRESENT_TENSE_VERB_PREFIXES = {"ي", "ت"}
 _PREPOSITIONS = {"في", "من", "إلى", "على", "عن", "ب", "ل", "ك"}
+VALID_SENTENCE_PATTERNS = {"empty", "nominal", "verbal", "prepositional"}
+REQUIRED_MINIMAL_AXES = ("lexical_axis", "directional_context", "hierarchical_context", "sentence_pattern_axis")
+
+
+def _is_lexical_alpha(token: str) -> bool:
+    if not token:
+        return False
+    has_letter = False
+    for char in token:
+        category = unicodedata.category(char)
+        if category.startswith("L"):
+            has_letter = True
+            continue
+        if category.startswith("M"):
+            continue
+        return False
+    return has_letter
 
 
 def _sentence_pattern(tokens: list[str]) -> str:
     if not tokens:
         return "empty"
     first = tokens[0]
-    if first.startswith(_VERB_PREFIXES):
+    first_char = first[0] if first else ""
+    if first_char in PRESENT_TENSE_VERB_PREFIXES:
         return "verbal"
     if first in _PREPOSITIONS:
         return "prepositional"
@@ -39,8 +59,8 @@ def apply_minimal_complete_encoding_contract(state: ProofState) -> ProofState:
                 "normalized": token,
                 "token_index": token_index,
                 "lexical_axis": {
-                    "identity": token,
-                    "kind": "alpha" if token.isalpha() else "mixed_or_symbolic",
+                    "raw_token": token,
+                    "kind": "alpha" if _is_lexical_alpha(token) else "mixed_or_symbolic",
                     "features": {"length": len(token)},
                 },
                 "directional_context": {
@@ -57,7 +77,7 @@ def apply_minimal_complete_encoding_contract(state: ProofState) -> ProofState:
         )
 
     irreducible_axes_complete = all(
-        all(axis in unit for axis in ("lexical_axis", "directional_context", "hierarchical_context", "sentence_pattern_axis"))
+        all(axis in unit for axis in REQUIRED_MINIMAL_AXES)
         for unit in token_units
     )
     token_coverage_complete = len(token_units) == len(tokens)
