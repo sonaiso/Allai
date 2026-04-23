@@ -13,6 +13,7 @@ from arabic_engine.foundational.gates import (
     apply_proto_concept_gate,
 )
 from arabic_engine.foundational.layers import apply_ontological_property_layer
+from arabic_engine.language.minimal_complete_encoding import apply_minimal_complete_encoding_contract
 from arabic_engine.symbolic.encoding import apply_symbolic_encoding_layer
 from core.ambiguity.conflict_resolution import resolve_ambiguity_conflicts
 from core.ambiguity.detection import detect_ambiguity
@@ -53,6 +54,7 @@ class EndToEndProofTests(unittest.TestCase):
         apply_admissibility_pre_u0(state)
         apply_ontological_property_layer(state)
         apply_symbolic_encoding_layer(state)
+        apply_minimal_complete_encoding_contract(state)
 
         apply_singular_perceptual_closure(state)
         apply_singular_informational_closure(state)

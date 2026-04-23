@@ -17,6 +17,7 @@ from arabic_engine.foundational.gates import (
     apply_proto_concept_gate,
 )
 from arabic_engine.foundational.layers import apply_ontological_property_layer
+from arabic_engine.language.minimal_complete_encoding import apply_minimal_complete_encoding_contract
 from arabic_engine.symbolic.encoding import apply_symbolic_encoding_layer
 from core.composition.role_distribution import apply_role_distribution_composition
 from core.gates.validator import GateViolationError
@@ -71,6 +72,7 @@ class AdditionalCoverageTests(unittest.TestCase):
             "singular_logical_classificatory_closure",
             "singular_unified_closure",
             "singular_closure_record_assembled",
+            "minimal_complete_encoding_contract",
             "composition_applied",
             "ambiguity_detected",
             "ambiguity_ranked",
@@ -205,6 +207,33 @@ class AdditionalCoverageTests(unittest.TestCase):
         state = ProofState(ingress_text="x", composition={"subject": "x"}, communicative_closed=False)
         apply_proposition_closure(state)
         self.assertFalse(state.proposition_closed)
+
+    def test_minimal_complete_encoding_contract_populates_irreducible_axes(self) -> None:
+        state = ProofState(ingress_text="كتب الطالب الدرس")
+        apply_unicode_ingress(state)
+        apply_minimal_complete_encoding_contract(state)
+
+        encoding = state.symbolic_state["minimal_complete_encoding"]
+        self.assertTrue(encoding["completeness"]["complete"])
+        self.assertEqual(encoding["token_count"], 3)
+        self.assertIn(encoding["sentence_pattern"], {"nominal", "verbal", "prepositional"})
+        self.assertTrue(all("directional_context" in unit for unit in encoding["token_units"]))
+
+    def test_composition_rejected_without_minimal_complete_encoding_contract(self) -> None:
+        state = ProofState(ingress_text="النص واضح")
+        state.singular_existence_closed = True
+        state.singular_designation_closed = True
+        state.singular_possibility_closed = True
+        state.singular_identity_closed = True
+        state.singular_relational_closed = True
+        state.singular_weight_closed = True
+        state.singular_logical_classificatory_closed = True
+        apply_singular_unified_closure(state)
+        assemble_singular_closure_record(state)
+
+        with self.assertRaises(GateViolationError):
+            apply_role_distribution_composition(state)
+        self.assertEqual(state.trace_chain[-1]["payload"]["reason"], "missing_or_incomplete_minimal_complete_encoding_contract")
 
     def test_designation_rejects_when_existence_not_closed(self) -> None:
         state = ProofState(ingress_text="x", singular_existence_closed=False)

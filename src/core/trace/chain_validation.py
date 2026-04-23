@@ -51,6 +51,12 @@ def validate_trace_chain(state: ProofState) -> bool:
     if positions != sorted(positions):
         return _reject(state, "required_events_out_of_order")
 
+    minimal_encoding_event = "minimal_complete_encoding_contract"
+    if minimal_encoding_event not in event_positions:
+        return _reject(state, f"missing_required_events:{minimal_encoding_event}")
+    if event_positions[minimal_encoding_event] > event_positions["composition_applied"]:
+        return _reject(state, "minimal_encoding_event_after_composition")
+
     pre_language_valid, pre_language_reason = validate_pre_language_trace(state)
     state.conceptual_state.setdefault("pre_language", {})
     state.conceptual_state["pre_language"]["trace_validation"] = {
