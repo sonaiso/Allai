@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "allai"
+version = "0.1.0"
+description = "Arabic language AI engine — singular closure proof system"
+requires-python = ">=3.11"
+# No runtime dependencies; the engine relies entirely on the Python standard library.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "flake8>=7.0",
+    "mypy>=1.9",
+    "coverage>=7.4",
+]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict = false
+
+[[tool.mypy.overrides]]
+# Pre-existing index-type error (event from dict.get() is Any | None).
+# This file was not modified by this implementation plan.
+module = "arabic_engine.foundational.gates"
+ignore_errors = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true

@@ -19,8 +19,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run tests
+      - name: Install dev dependencies
+        run: pip install flake8 mypy coverage
+
+      - name: Lint
+        run: flake8 src/ tests/ --max-line-length=120
+
+      - name: Type check
+        env:
+          PYTHONPATH: src
+        run: mypy src/ --ignore-missing-imports --config-file=pyproject.toml
+
+      - name: Run tests with coverage
         env:
           PYTHONPATH: src
         run: |
-          python -m unittest discover -s tests -p 'test_*.py' -v
+          coverage run -m unittest discover -s tests -p 'test_*.py' -v
+          coverage report --fail-under=85

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import unicodedata
 
+from core.constants import PREPOSITIONS, VERB_PREFIXES
 from core.model import ProofState
 
-PRESENT_TENSE_VERB_PREFIXES = {"ي", "ت"}
-_PREPOSITIONS = {"في", "من", "إلى", "على", "عن", "ب", "ل", "ك"}
 VALID_SENTENCE_PATTERNS = {"empty", "nominal", "verbal", "prepositional"}
 REQUIRED_MINIMAL_AXES = ("lexical_axis", "directional_context", "hierarchical_context", "sentence_pattern_axis")
 
@@ -30,9 +29,9 @@ def _sentence_pattern(tokens: list[str]) -> str:
         return "empty"
     first = tokens[0]
     first_char = first[0] if first else ""
-    if first_char in PRESENT_TENSE_VERB_PREFIXES:
+    if first_char in VERB_PREFIXES:
         return "verbal"
-    if first in _PREPOSITIONS:
+    if first in PREPOSITIONS:
         return "prepositional"
     return "nominal"
 

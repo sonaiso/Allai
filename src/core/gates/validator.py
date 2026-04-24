@@ -1,8 +1,7 @@
+from core.exceptions import GateViolationError
 from core.model import ProofState
 
-
-class GateViolationError(ValueError):
-    """Raised when a constitutional gate is violated."""
+__all__ = ["GateViolationError"]
 
 
 def require_for_composition(state: ProofState) -> None:

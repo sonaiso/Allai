@@ -1,0 +1,30 @@
+[flake8]
+max-line-length = 120
+
+# Test files use sys.path.insert() before imports (established project pattern).
+# Arabic lexicons use alignment whitespace and Arabic-script comma spacing.
+# Several pre-existing files have known lint issues documented below.
+extend-ignore =
+    E221,
+    E231,
+    E402,
+
+# Pre-existing issues scoped to specific files — do not expand these.
+per-file-ignores =
+    src/arabic_engine/language/concept_registry.py: F401
+    src/arabic_engine/language/lexical_enrichment_gate.py: F401
+    src/arabic_engine/language/lexicon_layer.py: E501,E251
+    src/core/world_model/extractor.py: F401
+    src/core/world_model/world_knowledge_layer.py: F401
+    tests/test_additional_coverage.py: E501,F811
+    tests/test_new_coverage.py: E501
+    tests/test_e2e_arabic_enriched.py: F841,E741
+
+exclude =
+    .git,
+    __pycache__,
+    *.pyc,
+    .mypy_cache,
+    dist,
+    build,
+    *.egg-info

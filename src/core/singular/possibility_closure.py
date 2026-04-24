@@ -1,16 +1,10 @@
 from core.model import ProofState
+from core.singular._helpers import _set_rank_blocked
 
 
 def apply_singular_possibility_closure(state: ProofState) -> ProofState:
     if not state.singular_designation_closed:
-        blocker = "prior_level_incomplete:designation"
-        state.singular_possibility_closed = False
-        state.singular_level_evidence["possibility"] = {}
-        state.singular_level_blockers["possibility"] = blocker
-        state.singular_rank_states["possibility"] = False
-        state.singular_rank_sublayers["possibility"] = {}
-        state.singular_rank_blockers["possibility"] = blocker
-        state.add_trace("singular_possibility_closure", {"closed": False, "blocker": blocker})
+        _set_rank_blocked(state, "possibility", "prior_level_incomplete:designation")
         return state
 
     text = state.effective_text()

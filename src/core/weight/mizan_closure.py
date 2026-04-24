@@ -1,7 +1,5 @@
+from core.constants import ALLOWED_WEIGHTS
 from core.model import ProofState
-
-
-_ALLOWED_WEIGHTS = {"fa3ala", "maf3ul", "fi3l"}
 
 
 def apply_mizan_closure(state: ProofState) -> ProofState:
@@ -15,7 +13,7 @@ def apply_mizan_closure(state: ProofState) -> ProofState:
     else:
         state.weight_label = "fi3l"
 
-    state.weight_closed = state.weight_label in _ALLOWED_WEIGHTS
+    state.weight_closed = state.weight_label in ALLOWED_WEIGHTS
     state.add_trace(
         "mizan_closure",
         {"weight_label": state.weight_label, "closed": state.weight_closed, "token_count": token_count},

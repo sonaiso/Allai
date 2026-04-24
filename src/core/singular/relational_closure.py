@@ -1,16 +1,10 @@
 from core.model import ProofState
+from core.singular._helpers import _set_rank_blocked
 
 
 def apply_singular_relational_closure(state: ProofState) -> ProofState:
     if not state.singular_identity_closed:
-        blocker = "prior_level_incomplete:identity"
-        state.singular_relational_closed = False
-        state.singular_level_evidence["relational"] = {}
-        state.singular_level_blockers["relational"] = blocker
-        state.singular_rank_states["relational"] = False
-        state.singular_rank_sublayers["relational"] = {}
-        state.singular_rank_blockers["relational"] = blocker
-        state.add_trace("singular_relational_closure", {"closed": False, "blocker": blocker})
+        _set_rank_blocked(state, "relational", "prior_level_incomplete:identity")
         return state
 
     identity = state.singular_level_evidence.get("identity", {})

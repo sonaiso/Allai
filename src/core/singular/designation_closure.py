@@ -1,9 +1,11 @@
 import unicodedata
+from typing import Any
 
 from core.model import ProofState
+from core.singular._helpers import _set_rank_blocked
 
 
-def _designation_evidence(text: str) -> dict[str, bool]:
+def _designation_evidence(text: str) -> dict[str, Any]:
     tokens = [t for t in text.split() if t]
     minimum_conditions = {
         "boundary_fixed": bool(tokens),
@@ -23,14 +25,12 @@ def _designation_evidence(text: str) -> dict[str, bool]:
 
 def apply_singular_designation_closure(state: ProofState) -> ProofState:
     if not state.singular_existence_closed:
-        blocker = "prior_level_incomplete:existence"
-        state.singular_designation_closed = False
-        state.singular_level_evidence["designation"] = _designation_evidence("")
-        state.singular_level_blockers["designation"] = blocker
-        state.singular_rank_states["designation"] = False
-        state.singular_rank_sublayers["designation"] = state.singular_level_evidence["designation"]
-        state.singular_rank_blockers["designation"] = blocker
-        state.add_trace("singular_designation_closure", {"closed": False, "blocker": blocker})
+        _set_rank_blocked(
+            state,
+            "designation",
+            "prior_level_incomplete:existence",
+            evidence=_designation_evidence(""),
+        )
         return state
 
     text = state.effective_text()
