@@ -61,6 +61,8 @@ class ProofState:
     world_model_closed: bool = False
     judgement: Optional[str] = None
 
+    enriched_concepts: List[Dict[str, Any]] = field(default_factory=list)
+
     conceptual_state: Dict[str, Any] = field(default_factory=dict)
     symbolic_state: Dict[str, Any] = field(default_factory=dict)
 
