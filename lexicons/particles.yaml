@@ -1,0 +1,64 @@
+version: 1
+description: >
+  معجم أدوات الربط (حروف الجر والعطف) — يعكس RELATION_LEXICON في الكود.
+
+particles:
+  - particle: في
+    relation_type: Containment
+    domain: [مكان, مجال, زمان]
+    constraint: "X داخل Y"
+
+  - particle: من
+    relation_type: Origin
+    domain: [مكان, مصدر]
+    constraint: "X صادر من Y"
+
+  - particle: إلى
+    relation_type: Direction
+    domain: [مكان, وجهة]
+    constraint: "X متجه نحو Y"
+
+  - particle: على
+    relation_type: Surface
+    domain: [مكان, استعلاء]
+    constraint: "X فوق Y"
+
+  - particle: عن
+    relation_type: Separation
+    domain: [مكان, سبب]
+    constraint: "X بعيد/صادر عن Y"
+
+  - particle: ب
+    relation_type: Instrumentality
+    domain: [أداة, مصاحبة]
+    constraint: "X بواسطة Y"
+
+  - particle: ل
+    relation_type: Beneficiary
+    domain: [مستفيد, غرض]
+    constraint: "X لأجل Y أو ملك Y"
+
+  - particle: ك
+    relation_type: Similitude
+    domain: [تشبيه]
+    constraint: "X مثل Y"
+
+  - particle: مع
+    relation_type: Accompaniment
+    domain: [مصاحبة]
+    constraint: "X بصحبة Y"
+
+  - particle: و
+    relation_type: Conjunction
+    domain: [ربط]
+    constraint: "X وY معًا"
+
+  - particle: ف
+    relation_type: Consequence
+    domain: [سببية]
+    constraint: "X ثم حدث Y"
+
+  - particle: ثم
+    relation_type: Sequence
+    domain: [تتابع]
+    constraint: "X ثم Y بترتيب"
