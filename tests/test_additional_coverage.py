@@ -15,8 +15,10 @@ from arabic_engine.foundational.gates import (
     apply_percept_gate,
     apply_pre_reality_gate,
     apply_proto_concept_gate,
+    validate_pre_language_trace,
 )
 from arabic_engine.foundational.layers import apply_ontological_property_layer
+from arabic_engine.symbolic.encoding import _letter_role, apply_symbolic_encoding_layer
 from arabic_engine.language.minimal_complete_encoding import (
     VALID_SENTENCE_PATTERNS,
     apply_minimal_complete_encoding_contract,
@@ -60,6 +62,34 @@ class AdditionalCoverageTests(unittest.TestCase):
         self.assertIn("symbolic_encoding_layer", state.symbolic_state)
         self.assertTrue(any(item["event"] == "alignment_gate" for item in state.trace_chain))
 
+    def test_proto_concept_gate_handles_haraka_units(self) -> None:
+        state = ProofState(ingress_text="x")
+        state.conceptual_state["pre_language"] = {
+            "percept_units": [
+                {"unit_type": "haraka", "token_index": 0},
+                {"unit_type": "letter_or_symbol", "token_index": 0},
+            ]
+        }
+
+        apply_proto_concept_gate(state)
+
+        concepts = state.conceptual_state["pre_language"]["proto_concepts"]
+        self.assertEqual(concepts[0]["label"], "prosodic_marker")
+        self.assertEqual(concepts[0]["confidence"], 0.6)
+        self.assertEqual(concepts[1]["label"], "lexical_anchor")
+        self.assertEqual(concepts[1]["confidence"], 0.7)
+
+    def test_validate_pre_language_trace_branch_cases(self) -> None:
+        missing_trace_state = ProofState(ingress_text="x")
+        self.assertEqual(validate_pre_language_trace(missing_trace_state), (True, "not_present_in_trace"))
+
+        out_of_order_state = ProofState(ingress_text="x")
+        out_of_order_state.trace_chain = [
+            {"event_id": 1, "event": "percept_gate", "payload": {}, "timestamp": "2026-01-01T00:00:00+00:00"},
+            {"event_id": 2, "event": "pre_reality_gate", "payload": {}, "timestamp": "2026-01-01T00:00:00+00:00"},
+        ]
+        self.assertEqual(validate_pre_language_trace(out_of_order_state), (False, "pre_language_events_out_of_order"))
+
     def test_concept_first_requires_pre_language_trace_for_judgement_validation(self) -> None:
         state = ProofState(ingress_text="x", processing_mode="concept_first")
         required_events = [
@@ -96,6 +126,16 @@ class AdditionalCoverageTests(unittest.TestCase):
         apply_unicode_ingress(state)
         apply_admissibility_pre_u0(state)
         self.assertTrue(state.admissible)
+
+    def test_symbolic_encoding_covers_haraka_and_non_lexical_roles(self) -> None:
+        state = ProofState(ingress_text="A1! َ")
+        apply_symbolic_encoding_layer(state)
+
+        encoded = state.symbolic_state["symbolic_encoding_layer"]
+        self.assertEqual([entry["role"] for entry in encoded["letters"]], ["lexical_carrier", "numeric_carrier", "symbolic_marker"])
+        self.assertEqual(len(encoded["harakat"]), 1)
+        self.assertEqual(encoded["harakat"][0]["role"], "phonetic_modifier")
+        self.assertEqual(_letter_role(" "), "separator")
 
     def test_enforce_singular_closure_rejects_incomplete_state(self) -> None:
         state = ProofState(ingress_text="text")
