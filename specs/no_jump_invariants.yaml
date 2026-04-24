@@ -29,3 +29,8 @@ invariants:
       - adjacency_relational_to_weight
       - adjacency_weight_to_logical_classificatory
       - adjacency_logical_classificatory_to_unified_closure
+  - id: NJ-005
+    name: no_judgement_before_world_model_closure
+    forbidden_if_missing:
+      - world_model_extracted
+      - world_model_closed

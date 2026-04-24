@@ -21,6 +21,8 @@ _REQUIRED_EVENTS_FOR_JUDGEMENT = [
     "ambiguity_outcome",
     "communicative_closure",
     "proposition_closure",
+    "world_model_extracted",
+    "world_model_closure",
 ]
 
 

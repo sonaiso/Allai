@@ -57,6 +57,8 @@ class ProofState:
 
     communicative_closed: bool = False
     proposition_closed: bool = False
+    world_model: Dict[str, Any] = field(default_factory=dict)
+    world_model_closed: bool = False
     judgement: Optional[str] = None
 
     conceptual_state: Dict[str, Any] = field(default_factory=dict)

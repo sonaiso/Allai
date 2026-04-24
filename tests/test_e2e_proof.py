@@ -38,6 +38,8 @@ from core.trace.singular_trace import emit_singular_trace
 from core.weight.derivational_eligibility import determine_derivational_eligibility
 from core.weight.mizan_closure import apply_mizan_closure
 from core.weight.weight_legality import verify_weight_legality
+from core.world_model.closure import apply_world_model_closure
+from core.world_model.extractor import extract_world_model
 
 
 class EndToEndProofTests(unittest.TestCase):
@@ -77,6 +79,8 @@ class EndToEndProofTests(unittest.TestCase):
         apply_communicative_closure(state)
 
         apply_proposition_closure(state)
+        extract_world_model(state)
+        apply_world_model_closure(state)
         transition_proposition_to_judgement(state)
 
         digest_1 = replay_digest(state)
@@ -85,6 +89,7 @@ class EndToEndProofTests(unittest.TestCase):
         self.assertEqual(state.judgement, "accepted")
         self.assertTrue(state.proposition_closed)
         self.assertTrue(state.communicative_closed)
+        self.assertTrue(state.world_model_closed)
         self.assertTrue(state.ready_for_composition)
         self.assertIn("minimum_gate_snapshot", state.singular_closure_record)
         self.assertIn("deferred_analysis_snapshot", state.singular_closure_record)
@@ -92,6 +97,9 @@ class EndToEndProofTests(unittest.TestCase):
         self.assertIn("pre_language", state.conceptual_state)
         self.assertIn("symbolic_encoding_layer", state.symbolic_state)
         self.assertEqual(digest_1, digest_2)
+        self.assertIn("entities", state.world_model)
+        self.assertIn("laws", state.world_model)
+        self.assertTrue(state.world_model.get("closed"))
 
 
 if __name__ == "__main__":
