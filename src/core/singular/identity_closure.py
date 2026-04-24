@@ -1,28 +1,22 @@
+from core.constants import DEFINITE_ARTICLE, FEMININE_MARKER, PREPOSITIONS, VERB_PREFIXES
 from core.model import ProofState
-
-
-VERB_PREFIXES = ("ي", "ت")
-DEFINITE_ARTICLE = "ال"
-FEMININE_MARKER = "ة"
+from core.singular._helpers import _set_rank_blocked
 
 
 def _determine_word_class(tokens: list[str]) -> str:
     first = tokens[0] if tokens else ""
+    if not first:
+        return ""
+    if first in PREPOSITIONS:
+        return "particle"
     if first.startswith(VERB_PREFIXES):
         return "verb"
-    return "noun" if first else ""
+    return "noun"
 
 
 def apply_singular_identity_closure(state: ProofState) -> ProofState:
     if not state.singular_possibility_closed:
-        blocker = "prior_level_incomplete:possibility"
-        state.singular_identity_closed = False
-        state.singular_level_evidence["identity"] = {}
-        state.singular_level_blockers["identity"] = blocker
-        state.singular_rank_states["identity"] = False
-        state.singular_rank_sublayers["identity"] = {}
-        state.singular_rank_blockers["identity"] = blocker
-        state.add_trace("singular_identity_closure", {"closed": False, "blocker": blocker})
+        _set_rank_blocked(state, "identity", "prior_level_incomplete:possibility")
         return state
 
     tokens = [t for t in state.effective_text().split() if t]

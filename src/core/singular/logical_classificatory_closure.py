@@ -1,16 +1,14 @@
 from core.model import ProofState
+from core.singular._helpers import _set_rank_blocked
 
 
 def apply_singular_logical_classificatory_closure(state: ProofState) -> ProofState:
     if not state.singular_weight_closed:
-        blocker = "prior_rank_incomplete:weight"
-        state.singular_logical_classificatory_closed = False
-        state.singular_level_evidence["logical_classificatory"] = {}
-        state.singular_level_blockers["logical_classificatory"] = blocker
-        state.singular_rank_states["logical_classificatory"] = False
-        state.singular_rank_sublayers["logical_classificatory"] = {}
-        state.singular_rank_blockers["logical_classificatory"] = blocker
-        state.add_trace("singular_logical_classificatory_closure", {"closed": False, "blocker": blocker})
+        _set_rank_blocked(
+            state,
+            "logical_classificatory",
+            "prior_rank_incomplete:weight",
+        )
         return state
 
     tokens = [t for t in state.effective_text().split() if t]

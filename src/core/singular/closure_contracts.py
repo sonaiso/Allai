@@ -1,8 +1,7 @@
+from core.exceptions import SingularClosureError
 from core.model import ProofState
 
-
-class SingularClosureError(ValueError):
-    pass
+__all__ = ["SingularClosureError"]
 
 
 def enforce_singular_closure(state: ProofState) -> None:
