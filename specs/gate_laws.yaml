@@ -33,3 +33,8 @@ laws:
     when: composition
     requires:
       - role_distribution_min_tokens_2
+  - id: GL-004
+    name: judgement_requires_world_model_closure
+    when: judgement
+    requires:
+      - world_model_closed

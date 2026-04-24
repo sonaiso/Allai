@@ -32,14 +32,23 @@ def require_for_composition(state: ProofState) -> None:
 def require_for_judgement(state: ProofState, trace_chain_valid: bool) -> None:
     ambiguity_ok = state.ambiguity_outcome in {"resolved", "suspended"} and bool(state.ambiguity_reason)
     proposition_integrity_ok = state.proposition_closed and bool(state.composition)
-    if not (proposition_integrity_ok and state.communicative_closed and ambiguity_ok and trace_chain_valid):
+    world_model_ok = state.world_model_closed
+    if not (
+        proposition_integrity_ok
+        and state.communicative_closed
+        and ambiguity_ok
+        and trace_chain_valid
+        and world_model_ok
+    ):
         state.add_trace(
             "judgement_rejected",
             {
-                "reason": "missing_proposition_or_communication_or_ambiguity_or_trace_validity",
+                "reason": "missing_proposition_or_communication_or_ambiguity_or_trace_validity_or_world_model",
                 "trace_chain_valid": trace_chain_valid,
+                "world_model_closed": world_model_ok,
             },
         )
         raise GateViolationError(
-            "No judgement without proposition closure + communicative closure + ambiguity resolution/suspend + valid trace chain."
+            "No judgement without proposition closure + communicative closure + ambiguity resolution/suspend"
+            " + valid trace chain + world model closure."
         )
