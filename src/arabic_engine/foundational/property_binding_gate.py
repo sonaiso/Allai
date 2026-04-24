@@ -109,8 +109,6 @@ def _select_bundle(proto_label: str, source_unit_type: str) -> dict[str, list[st
         return _HARAKA_BUNDLE
     if proto_label == "lexical_anchor":
         return _LEXICAL_ANCHOR_BUNDLE
-    if proto_label == "prosodic_marker":
-        return _PROSODIC_MARKER_BUNDLE
     return _DEFAULT_BUNDLE
 
 

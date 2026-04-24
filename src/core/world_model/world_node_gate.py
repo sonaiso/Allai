@@ -150,8 +150,9 @@ def apply_world_node_gate(state: ProofState) -> ProofState:
         # اجمع الخواص من property_bundles
         props = _collect_properties_for_token(t_idx, property_bundles)
 
-        # إن لم تكن هناك خواص من property_bundles، أضف خصائص افتراضية بسيطة
-        # بناءً على نوع الإثراء (تضمن ألا يُحجب المفهوم بسبب غياب التسلسل)
+        # إن لم تكن هناك خواص من property_bundles (مثلاً عند تخطي property_binding_gate
+        # في مسار lexical-only)، أضف خواصًا افتراضية بسيطة بناءً على نوع الإثراء.
+        # هذا الاحتياط يضمن أن المفاهيم المُثرَاة بمعلومات معجمية لا تُحجب بشكل خاطئ.
         if not props:
             if enriched.get("entity_type") or enriched.get("root") or enriched.get("relation_type"):
                 props = ["exists", "distinguishable"]

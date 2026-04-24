@@ -109,5 +109,5 @@ unit_type_defaults:
     existence: [exists]
     identity: [same, stable]
     boundary: [limited, separable, distinct]
-    perception: [distinguishable, pronounceable, bounded_percept]
+    perception: [distinguishable, pronounced, bounded_percept]
     judgment: [known]
