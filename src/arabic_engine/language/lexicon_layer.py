@@ -432,8 +432,10 @@ def _resolve_case_marker_kind(
     if ExceptionClass.FIVE_NOUNS in exception_types:
         if case_role == CaseRole.RAF:
             return CaseMarkerKind.LETTER_WAW
-        if case_role in (CaseRole.NASB, CaseRole.JARR):
+        if case_role == CaseRole.NASB:
             return CaseMarkerKind.LETTER_ALIF
+        if case_role == CaseRole.JARR:
+            return CaseMarkerKind.LETTER_YA
 
     if number == GrammaticalNumber.DUAL or ExceptionClass.DUAL in exception_types:
         if case_role == CaseRole.RAF:

@@ -4,6 +4,10 @@ BEGIN;
 -- 002_LEXICON_LAYER_SCHEMA
 -- طبقة المعجم: الاستيراد على طبقات
 --
+-- PREREQUISITE: 001_atomic_arabic_schema.sql must be applied
+-- first. This file references tables defined there:
+--   roots, patterns, haraka_units, augmentation_types.
+--
 -- الهيكل:
 --   RawLexicon → BuiltInventory + InflectedInventory
 --                     ↓
@@ -219,14 +223,17 @@ CREATE INDEX IF NOT EXISTS idx_built_inventory_subtype
 -- =========================================================
 -- 4. TABLE: inflected_inventory — المعربات الخام
 --    أسماء جامدة / جذور / مضارع / مشتقات
+--
+--    NOTE: root_id and pattern_id reference tables defined in
+--    001_atomic_arabic_schema.sql which must be applied first.
 -- =========================================================
 
 CREATE TABLE IF NOT EXISTS inflected_inventory (
     id                  BIGSERIAL PRIMARY KEY,
     entry_id            BIGINT NOT NULL REFERENCES lexicon_entries(id) ON DELETE CASCADE,
-    -- ربط اختياري بالجذر الصرفي (من جدول roots في الطبقة الصوتية)
+    -- ربط اختياري بالجذر الصرفي (من جدول roots في 001_atomic_arabic_schema.sql)
     root_id             BIGINT REFERENCES roots(id),
-    -- ربط اختياري بالوزن الصرفي (من جدول patterns)
+    -- ربط اختياري بالوزن الصرفي (من جدول patterns في 001_atomic_arabic_schema.sql)
     pattern_id          BIGINT REFERENCES patterns(id),
     radical_count       INTEGER CHECK (radical_count IS NULL OR radical_count BETWEEN 2 AND 6),
     -- الصيغة المجردة قبل دخول الجوازم والنواصب والتصريف
@@ -289,6 +296,10 @@ CREATE INDEX IF NOT EXISTS idx_lex_exc_map_class
 -- =========================================================
 -- 7. TABLE: operators — المشغّلات
 --    حركات + الزوائد العشرة + الموقع + الوزن + السياق
+--
+--    NOTE: haraka_unit_id references haraka_units, and
+--    augmentation_type_id references augmentation_types,
+--    both defined in 001_atomic_arabic_schema.sql.
 -- =========================================================
 
 CREATE TABLE IF NOT EXISTS operators (
