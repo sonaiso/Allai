@@ -38,3 +38,14 @@ laws:
     when: judgement
     requires:
       - world_model_closed
+  - id: GL-005
+    name: no_judgment_without_property
+    when: judgement
+    requires:
+      - property_bundles_non_empty
+  - id: GL-006
+    name: world_node_requires_property_bundle
+    when: world_model
+    requires:
+      - property_binding_gate_executed
+      - world_node_has_at_least_one_property

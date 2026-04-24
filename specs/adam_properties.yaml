@@ -1,0 +1,146 @@
+version: 1
+description: >
+  الخواص الأولى التي تُمكّن الإدراك والتسمية والحكم.
+  مرتبة في سبع طبقات من الأدنى (الوجود) إلى الأعلى (الحكم).
+  كل خاصية تحمل: مفتاحًا إنجليزيًا، واسمًا عربيًا، ونوع أثرها المعرفي.
+
+layers:
+
+  existence:
+    description: "خواص الوجود — هل الشيء موجود أم لا؟"
+    properties:
+      - key: exists
+        arabic: موجود
+        effect: anchors_percept
+      - key: absent
+        arabic: غائب
+        effect: marks_gap
+      - key: present
+        arabic: حاضر
+        effect: anchors_percept
+      - key: nonexistent
+        arabic: معدوم
+        effect: marks_gap
+
+  identity:
+    description: "خواص الهوية — هذا هو، أو هذا ليس هو"
+    properties:
+      - key: same
+        arabic: مماثل
+        effect: enables_reference
+      - key: different
+        arabic: مختلف
+        effect: enables_distinction
+      - key: stable
+        arabic: ثابت_نسبيًا
+        effect: enables_tracking
+      - key: recurring
+        arabic: متكرر
+        effect: enables_pattern
+
+  boundary:
+    description: "خواص التمايز والحدود — الفصل والاتصال"
+    properties:
+      - key: limited
+        arabic: محدود
+        effect: enables_distinction
+      - key: separable
+        arabic: قابل_للفصل
+        effect: enables_distinction
+      - key: similar
+        arabic: متشابه
+        effect: enables_grouping
+      - key: distinct
+        arabic: متمايز
+        effect: enables_grouping
+
+  perception:
+    description: "خواص الإدراك الحسي — ما يصل عبر الحواس"
+    properties:
+      - key: colored
+        arabic: ملوّن
+        effect: visual_percept
+      - key: shaped
+        arabic: له_شكل
+        effect: visual_percept
+      - key: audible
+        arabic: مسموع
+        effect: auditory_percept
+      - key: moving
+        arabic: متحرك
+        effect: kinetic_percept
+      - key: tangible
+        arabic: ملموس
+        effect: tactile_percept
+      - key: pronounced
+        arabic: قابل_للنطق
+        effect: phonetic_percept
+      - key: distinguishable
+        arabic: قابل_للتمييز
+        effect: discriminative_percept
+      - key: bounded_percept
+        arabic: محدود_الأثر
+        effect: bounded_percept
+
+  relation:
+    description: "خواص العلاقة المكانية والزمانية والمنطقية"
+    properties:
+      - key: inside
+        arabic: داخل
+        effect: spatial_relation
+      - key: above
+        arabic: فوق
+        effect: spatial_relation
+      - key: source
+        arabic: مصدر
+        effect: causal_relation
+      - key: goal
+        arabic: غاية
+        effect: causal_relation
+      - key: with
+        arabic: مع
+        effect: accompaniment_relation
+      - key: before
+        arabic: قبل
+        effect: temporal_relation
+      - key: after
+        arabic: بعد
+        effect: temporal_relation
+
+  action:
+    description: "خواص الفعل — الأدوار في الحدث"
+    properties:
+      - key: initiator
+        arabic: فاعل
+        effect: assigns_agent_role
+      - key: affected
+        arabic: متأثر
+        effect: assigns_patient_role
+      - key: instrument
+        arabic: أداة
+        effect: assigns_instrument_role
+      - key: result
+        arabic: نتيجة
+        effect: assigns_result_role
+
+  judgment:
+    description: "خواص الحكم — ما يُقال عن الشيء"
+    properties:
+      - key: true
+        arabic: صحيح
+        effect: positive_judgment
+      - key: false
+        arabic: غير_صحيح
+        effect: negative_judgment
+      - key: possible
+        arabic: ممكن
+        effect: modal_judgment
+      - key: impossible
+        arabic: ممتنع
+        effect: modal_judgment
+      - key: known
+        arabic: معلوم
+        effect: epistemic_judgment
+      - key: unknown
+        arabic: مجهول
+        effect: epistemic_judgment

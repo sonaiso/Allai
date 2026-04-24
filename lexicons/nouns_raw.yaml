@@ -1,0 +1,134 @@
+version: 1
+description: >
+  معجم الأسماء الجامدة والمشتقات — يعكس ENTITY_LEXICON وDERIVED_LEXICON في الكود.
+
+entities:
+  - entity: قلم
+    entity_type: أداة
+    affordances: [كتابة]
+    domain: [تعليم, تواصل]
+
+  - entity: كتاب
+    entity_type: مصنوع
+    affordances: [قراءة, تخزين_معلومة]
+    domain: [تعليم, معرفة]
+
+  - entity: ورقة
+    entity_type: مادة
+    affordances: [كتابة, طباعة]
+    domain: [تعليم]
+
+  - entity: طاولة
+    entity_type: أثاث
+    affordances: [وضع_أشياء]
+    domain: [بيت, مكتب]
+
+  - entity: كرسي
+    entity_type: أثاث
+    affordances: [جلوس]
+    domain: [بيت, مكتب]
+
+  - entity: باب
+    entity_type: بنية
+    affordances: [فتح, غلق, عبور]
+    domain: [بيت, مبنى]
+
+  - entity: ماء
+    entity_type: سائل
+    affordances: [شرب, غسل, سقي]
+    domain: [طبيعة, حياة]
+
+  - entity: نار
+    entity_type: ظاهرة
+    affordances: [إحراق, إضاءة]
+    domain: [طبيعة, خطر]
+
+  - entity: بيت
+    entity_type: مكان
+    affordances: [سكن, إيواء]
+    domain: [مجتمع]
+
+  - entity: مدرسة
+    entity_type: مكان
+    affordances: [تعليم, دراسة]
+    domain: [تعليم]
+
+  - entity: يد
+    entity_type: عضو
+    affordances: [حمل, كتابة, لمس]
+    domain: [جسد]
+
+  - entity: رجل
+    entity_type: إنسان
+    affordances: [قيام, مشي]
+    domain: [مجتمع]
+
+  - entity: طعام
+    entity_type: مادة
+    affordances: [أكل]
+    domain: [حياة]
+
+  - entity: هاتف
+    entity_type: أداة
+    affordances: [تواصل, اتصال]
+    domain: [تواصل, تقنية]
+
+  - entity: حاسوب
+    entity_type: أداة
+    affordances: [كتابة, حساب, تواصل]
+    domain: [تقنية]
+
+derived:
+  - form: كاتب
+    derived_type: اسم_فاعل
+    role: Initiator
+    root: "ك ت ب"
+    semantic_hint: "من يكتب"
+
+  - form: مكتوب
+    derived_type: اسم_مفعول
+    role: Patient
+    root: "ك ت ب"
+    semantic_hint: "ما كُتب"
+
+  - form: كتابة
+    derived_type: مصدر
+    role: AbstractProcess
+    root: "ك ت ب"
+    semantic_hint: "فعل الكتابة"
+
+  - form: كتاب
+    derived_type: اسم
+    role: Artifact
+    root: "ك ت ب"
+    semantic_hint: "نتاج الكتابة"
+
+  - form: مكتبة
+    derived_type: اسم_مكان
+    role: Location
+    root: "ك ت ب"
+    semantic_hint: "مكان الكتب"
+
+  - form: قارئ
+    derived_type: اسم_فاعل
+    role: Initiator
+    root: "ق ر أ"
+    semantic_hint: "من يقرأ"
+
+  - form: قراءة
+    derived_type: مصدر
+    role: AbstractProcess
+    root: "ق ر أ"
+    semantic_hint: "فعل القراءة"
+
+  - form: عالم
+    derived_type: اسم_فاعل
+    role: KnowledgeHolder
+    root: "ع ل م"
+    semantic_hint: "حامل العلم"
+
+  - form: دراسة
+    derived_type: مصدر
+    role: AbstractProcess
+    root: "د ر س"
+    semantic_hint: "فعل الدراسة"

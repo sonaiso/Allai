@@ -1,0 +1,113 @@
+version: 1
+description: >
+  ربط الخواص الأوليّة بالكيانات والأفعال.
+  يُمكّن property_binding_gate من معرفة أي خواص تنتمي لكل نوع كيان أو فعل.
+
+entity_properties:
+  أداة:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited, separable]
+    perception: [shaped, tangible, distinguishable]
+    action: [instrument]
+    judgment: [known]
+
+  مادة:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited, separable]
+    perception: [tangible, shaped, distinguishable]
+    judgment: [known]
+
+  مكان:
+    existence: [exists]
+    identity: [stable, recurring]
+    boundary: [limited]
+    relation: [inside, above]
+    judgment: [known]
+
+  ظاهرة:
+    existence: [exists, present]
+    identity: [different]
+    boundary: [limited]
+    perception: [colored, moving, tangible, audible]
+    action: [initiator, result]
+    judgment: [possible]
+
+  إنسان:
+    existence: [exists]
+    identity: [same, stable, recurring]
+    boundary: [limited, separable]
+    perception: [shaped, moving, tangible]
+    action: [initiator, affected]
+    judgment: [known]
+
+  سائل:
+    existence: [exists]
+    identity: [stable, recurring]
+    boundary: [limited]
+    perception: [tangible, colored]
+    action: [affected]
+    judgment: [known]
+
+  عضو:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited, separable]
+    perception: [tangible, shaped]
+    action: [initiator, instrument]
+    judgment: [known]
+
+  مصنوع:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited, separable]
+    perception: [shaped, tangible]
+    action: [affected]
+    judgment: [known]
+
+  بنية:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited]
+    perception: [shaped, tangible]
+    action: [affected]
+    judgment: [known]
+
+  أثاث:
+    existence: [exists]
+    identity: [stable]
+    boundary: [limited, separable]
+    perception: [shaped, tangible]
+    action: [affected]
+    judgment: [known]
+
+action_properties:
+  فاعل:
+    action: [initiator]
+    existence: [exists, present]
+    identity: [same]
+    judgment: [known]
+
+  مفعول:
+    action: [affected]
+    existence: [exists]
+    identity: [same]
+    judgment: [known]
+
+  أداة_في_الحدث:
+    action: [instrument]
+    existence: [exists]
+    judgment: [known]
+
+unit_type_defaults:
+  haraka:
+    perception: [pronounced, audible]
+    judgment: [possible]
+
+  letter_or_symbol:
+    existence: [exists]
+    identity: [same, stable]
+    boundary: [limited, separable, distinct]
+    perception: [distinguishable, pronounceable, bounded_percept]
+    judgment: [known]

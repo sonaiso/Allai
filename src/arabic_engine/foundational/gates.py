@@ -4,12 +4,14 @@ from dataclasses import asdict
 import unicodedata
 
 from arabic_engine.foundational.models import PerceptUnit, ProtoConcept, RealityAlignment
+from arabic_engine.foundational.property_binding_gate import apply_property_binding_gate
 from core.model import ProofState
 
 _PRE_LANGUAGE_ORDER = [
     "pre_reality_gate",
     "percept_gate",
     "proto_concept_gate",
+    "property_binding_gate",
     "alignment_gate",
     "naming_gate",
     "unicode_ingress",
@@ -36,6 +38,10 @@ def apply_pre_reality_gate(state: ProofState) -> ProofState:
     return state
 
 
+_HARAKA_PROPERTIES: tuple[str, ...] = ("pronounced", "audible")
+_LETTER_PROPERTIES: tuple[str, ...] = ("exists", "distinguishable", "pronounceable", "bounded")
+
+
 def apply_percept_gate(state: ProofState) -> ProofState:
     text = state.effective_text()
     percept_units: list[PerceptUnit] = []
@@ -46,6 +52,7 @@ def apply_percept_gate(state: ProofState) -> ProofState:
         if char_index == 0 or text[char_index - 1].isspace():
             token_index += 1
         unit_type = "haraka" if unicodedata.combining(char) > 0 else "letter_or_symbol"
+        properties = _HARAKA_PROPERTIES if unit_type == "haraka" else _LETTER_PROPERTIES
         percept_units.append(
             PerceptUnit(
                 surface=char,
@@ -53,6 +60,7 @@ def apply_percept_gate(state: ProofState) -> ProofState:
                 unit_type=unit_type,
                 token_index=max(token_index, 0),
                 char_index=char_index,
+                properties=properties,
             )
         )
 

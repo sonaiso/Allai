@@ -11,6 +11,7 @@ class PerceptUnit:
     unit_type: str
     token_index: int
     char_index: int
+    properties: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

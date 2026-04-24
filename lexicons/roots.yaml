@@ -1,0 +1,80 @@
+version: 1
+description: >
+  معجم الجذور الثلاثية — يعكس ROOT_LEXICON في الكود.
+  كل جذر يحمل: اللبّ الدلالي، المجالات، والأدوار.
+
+roots:
+  - root: "ك ت ب"
+    semantic_core: "إحداث نقش/ترميز"
+    domain: [معرفة, تواصل]
+    roles: [فاعل, مفعول, أداة]
+
+  - root: "ق ر أ"
+    semantic_core: "استقبال رموز/معنى"
+    domain: [معرفة, تواصل]
+    roles: [فاعل, مفعول]
+
+  - root: "ع ل م"
+    semantic_core: "حصول اليقين بالشيء"
+    domain: [معرفة, إدراك]
+    roles: [فاعل, مفعول]
+
+  - root: "ف ه م"
+    semantic_core: "إدراك المعنى الداخلي"
+    domain: [إدراك]
+    roles: [فاعل, مفعول]
+
+  - root: "ق و ل"
+    semantic_core: "إصدار كلام"
+    domain: [تواصل]
+    roles: [فاعل, مفعول]
+
+  - root: "ذ ه ب"
+    semantic_core: "انتقال في المكان"
+    domain: [حركة]
+    roles: [فاعل, وجهة]
+
+  - root: "ج ل س"
+    semantic_core: "استقرار بوضع معين"
+    domain: [حركة, حال]
+    roles: [فاعل, مكان]
+
+  - root: "أ ك ل"
+    semantic_core: "إدخال غذاء وتحليله"
+    domain: [فيزياء, حياة]
+    roles: [فاعل, مفعول]
+
+  - root: "ض ر ب"
+    semantic_core: "إحداث أثر بقوة"
+    domain: [فيزياء]
+    roles: [فاعل, مفعول, أداة]
+
+  - root: "ف ت ح"
+    semantic_core: "إزالة حاجز/إغلاق"
+    domain: [فيزياء, فعل]
+    roles: [فاعل, مفعول]
+
+  - root: "ن ص ر"
+    semantic_core: "تقديم عون"
+    domain: [اجتماع]
+    roles: [فاعل, مفعول]
+
+  - root: "د ر س"
+    semantic_core: "تكرار قصد الفهم والحفظ"
+    domain: [معرفة]
+    roles: [فاعل, مفعول]
+
+  - root: "ح م ل"
+    semantic_core: "رفع شيء ونقله"
+    domain: [فيزياء]
+    roles: [فاعل, مفعول]
+
+  - root: "و ج د"
+    semantic_core: "كون الشيء موجودًا"
+    domain: [وجود]
+    roles: [فاعل]
+
+  - root: "ب ن ي"
+    semantic_core: "تشييد/تأسيس"
+    domain: [فيزياء, مجتمع]
+    roles: [فاعل, مفعول]
