@@ -17,10 +17,6 @@ dev = [
     "coverage>=7.4",
 ]
 
-[tool.flake8]
-max-line-length = 120
-exclude = [".git", "__pycache__", "*.pyc"]
-
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true

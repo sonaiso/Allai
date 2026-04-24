@@ -35,7 +35,7 @@ def apply_singular_designation_closure(state: ProofState) -> ProofState:
 
     text = state.effective_text()
     evidence = _designation_evidence(text)
-    minimum_conditions: dict[str, bool] = evidence["minimum_conditions"]
+    minimum_conditions = evidence["minimum_conditions"]
     closed = all(minimum_conditions.values())
     blocker = None if closed else "designation_incomplete"
 
