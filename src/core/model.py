@@ -66,6 +66,8 @@ class ProofState:
     conceptual_state: Dict[str, Any] = field(default_factory=dict)
     symbolic_state: Dict[str, Any] = field(default_factory=dict)
 
+    explanation_panel: Optional[Dict[str, Any]] = None
+
     trace_chain: List[Dict[str, Any]] = field(default_factory=list)
 
     def effective_text(self) -> str:
