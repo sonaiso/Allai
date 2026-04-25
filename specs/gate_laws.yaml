@@ -38,3 +38,14 @@ laws:
     when: judgement
     requires:
       - world_model_closed
+  - id: GL-005
+    name: rejection_gate_requires_verb_frame_and_enriched_concepts
+    when: rejection_gate
+    requires:
+      - agent_operator_result_present
+      - enriched_concepts_present
+  - id: GL-006
+    name: metaphor_gate_requires_conflict_detection
+    when: metaphor_gate
+    requires:
+      - rejection_gate_passed_or_conflict_flagged
