@@ -62,7 +62,7 @@ def apply_rejection_gate(
 
     # تحديد الحكم: مجازي محتمل أم رفض قطعي؟
     agent_type = agent_result.agent_type
-    # جحث عن خصائص مشتركة للكيان في المفاهيم المُثرَاة
+    # بحث عن خصائص مشتركة للكيان في المفاهيم المُثرَاة
     shared = _get_shared_properties(state, agent_result.agent_token)
     if agent_type in _METAPHOR_ELIGIBLE_TYPES or shared:
         judgment = "محتمل_مجازي"

@@ -150,13 +150,25 @@ def _semantic_check(enriched: list[dict], verb_token: str, frame: VerbFrame | No
     )
 
 
+def _normalize_token(token: str) -> str:
+    """يُزيل التشكيل وأداة التعريف من الرمز لأغراض المقارنة."""
+    # إزالة تنوين الفتح (ـًا)
+    result = token.replace("\u064B\u0627", "")
+    # إزالة باقي علامات التشكيل (U+064B..U+065F, U+0670)
+    result = "".join(
+        ch for ch in result if not ("\u064B" <= ch <= "\u065F" or ch == "\u0670")
+    )
+    # إزالة أداة التعريف
+    if result.startswith("ال") and len(result) > 2:
+        result = result[2:]
+    return result
+
+
 def _world_check(enriched: list[dict], verb_token: str) -> PredictionResult:
     """
     طبقة العالم: يتحقق من وجود أفعال مستحيلة مُسجَّلة في الكيانات.
     """
-    verb_bare = verb_token
-    if verb_bare.startswith("ال") and len(verb_bare) > 2:
-        verb_bare = verb_bare[2:]
+    verb_bare = _normalize_token(verb_token)
 
     for concept in enriched:
         if concept.get("token") in (verb_token, verb_bare):
@@ -165,8 +177,8 @@ def _world_check(enriched: list[dict], verb_token: str) -> PredictionResult:
         entity_type = concept.get("entity_type", "")
         if not entity_type:
             continue
-        # تحقق مما إذا كان الفعل الحالي مدرجًا في الأفعال المستحيلة
-        if any(imp in verb_token or verb_token in imp for imp in impossible):
+        # تحقق من تطابق دقيق بين الفعل والأفعال المستحيلة (بعد التطبيع)
+        if any(_normalize_token(imp) == verb_bare or imp == verb_token for imp in impossible):
             return PredictionResult(
                 layer="world",
                 passed=False,
