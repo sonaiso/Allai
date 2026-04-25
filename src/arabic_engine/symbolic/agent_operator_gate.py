@@ -104,10 +104,10 @@ def _verb_matches_affordance(verb: str, affordances: list) -> bool:
 
 def _find_verb(enriched_concepts: list[dict]) -> Optional[str]:
     """استخرج الفعل من المفاهيم المُثرَاة (بحث في الجذور والنوع الصرفي)."""
-    from arabic_engine.language.lexical_enrichment_gate import _ROOT_SURFACE_HINTS  # type: ignore[attr-defined]
+    from arabic_engine.language.lexical_enrichment_gate import has_root_surface_hint
     for concept in enriched_concepts:
         token = concept.get("token", "")
-        if _ROOT_SURFACE_HINTS.get(token):
+        if has_root_surface_hint(token):
             frame = get_verb_frame(token)
             if frame:
                 return token

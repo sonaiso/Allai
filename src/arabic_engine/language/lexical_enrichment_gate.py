@@ -526,3 +526,11 @@ def apply_lexical_enrichment_gate(state: ProofState) -> ProofState:
         },
     )
     return state
+
+
+def has_root_surface_hint(token: str) -> bool:
+    """
+    واجهة عامة: هل الرمز مُدرج كتلميح سطحي لجذر معروف؟
+    تُستخدم بدلًا من استيراد المتغير الخاص `_ROOT_SURFACE_HINTS`.
+    """
+    return token in _ROOT_SURFACE_HINTS
