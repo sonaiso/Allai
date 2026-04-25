@@ -34,3 +34,11 @@ invariants:
     forbidden_if_missing:
       - world_model_extracted
       - world_model_closed
+  - id: NJ-006
+    name: no_rejection_before_agent_operator
+    forbidden_if_missing:
+      - agent_operator_gate_applied
+  - id: NJ-007
+    name: no_metaphor_before_conflict_detection
+    forbidden_if_missing:
+      - rejection_gate_applied
