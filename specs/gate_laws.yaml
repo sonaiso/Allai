@@ -38,3 +38,15 @@ laws:
     when: judgement
     requires:
       - world_model_closed
+  - id: GL-005
+    name: symbolic_reasoning_requires_agent_operator_validation
+    when: symbolic_gates_active
+    requires:
+      - verb_frame_present_or_skipped
+      - agent_type_evaluated
+  - id: GL-006
+    name: metaphor_gate_requires_rejection_record_input
+    when: metaphor_gate
+    requires:
+      - rejection_gate_fired
+      - judgment_is_muhatamal_majazi

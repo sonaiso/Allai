@@ -34,3 +34,14 @@ invariants:
     forbidden_if_missing:
       - world_model_extracted
       - world_model_closed
+  - id: NJ-006
+    name: no_metaphorical_accepted_without_shared_property
+    forbidden_if_missing:
+      - shared_property_found
+      - metaphor_judgment_is_resolved
+  - id: NJ-007
+    name: no_symbolic_gate_bypass
+    forbidden_if_missing:
+      - agent_operator_gate_fired
+      - rejection_gate_fired
+      - metaphor_gate_fired
