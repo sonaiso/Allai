@@ -70,6 +70,11 @@ class EntityEntry:
     entity_type: str                        # e.g. "أداة"
     affordances: tuple[str, ...]            # e.g. ("كتابة",)
     domain: tuple[str, ...]                 # e.g. ("تعليم",)
+    can_be_agent: bool = True               # هل يمكن أن يكون فاعلًا؟
+    possible_actions: tuple[str, ...] = ()  # أفعال ممكنة
+    impossible_actions: tuple[str, ...] = ()  # أفعال مستحيلة
+    entity_properties: tuple[str, ...] = ()  # خصائص أنطولوجية
+    shared_properties: tuple[str, ...] = ()  # خصائص مشتركة مع كيانات أخرى (للمجاز)
 
 
 @dataclass
@@ -90,6 +95,11 @@ class EnrichedConcept:
     affordances: List[str] = field(default_factory=list)
     confidence: float = 0.5
     enrichment_source: str = "none"
+    can_be_agent: bool = True
+    possible_actions: List[str] = field(default_factory=list)
+    impossible_actions: List[str] = field(default_factory=list)
+    entity_properties: List[str] = field(default_factory=list)
+    shared_properties: List[str] = field(default_factory=list)
 
 
 # =========================================================
@@ -195,21 +205,74 @@ _RELATION_INDEX: dict[str, RelationEntry] = {r.particle: r for r in RELATION_LEX
 
 
 ENTITY_LEXICON: tuple[EntityEntry, ...] = (
-    EntityEntry("قلم",    "أداة",    ("كتابة",),               ("تعليم", "تواصل")),
-    EntityEntry("كتاب",   "مصنوع",   ("قراءة", "تخزين_معلومة"), ("تعليم", "معرفة")),
-    EntityEntry("ورقة",   "مادة",    ("كتابة", "طباعة"),        ("تعليم",)),
-    EntityEntry("طاولة",  "أثاث",    ("وضع_أشياء",),           ("بيت", "مكتب")),
-    EntityEntry("كرسي",   "أثاث",    ("جلوس",),                ("بيت", "مكتب")),
-    EntityEntry("باب",    "بنية",    ("فتح", "غلق", "عبور"),   ("بيت", "مبنى")),
-    EntityEntry("ماء",    "سائل",    ("شرب", "غسل", "سقي"),    ("طبيعة", "حياة")),
-    EntityEntry("نار",    "ظاهرة",   ("إحراق", "إضاءة"),       ("طبيعة", "خطر")),
-    EntityEntry("بيت",    "مكان",    ("سكن", "إيواء"),          ("مجتمع",)),
-    EntityEntry("مدرسة",  "مكان",    ("تعليم", "دراسة"),        ("تعليم",)),
-    EntityEntry("يد",     "عضو",     ("حمل", "كتابة", "لمس"),  ("جسد",)),
-    EntityEntry("رجل",    "إنسان",   ("قيام", "مشي"),           ("مجتمع",)),
-    EntityEntry("طعام",   "مادة",    ("أكل",),                  ("حياة",)),
-    EntityEntry("هاتف",   "أداة",    ("تواصل", "اتصال"),        ("تواصل", "تقنية")),
-    EntityEntry("حاسوب",  "أداة",    ("كتابة", "حساب", "تواصل"), ("تقنية",)),
+    EntityEntry("قلم",    "أداة",    ("كتابة",),               ("تعليم", "تواصل"),
+                can_be_agent=False,
+                possible_actions=("كتابة",),
+                entity_properties=("وجود",)),
+    EntityEntry("كتاب",   "مصنوع",   ("قراءة", "تخزين_معلومة"), ("تعليم", "معرفة"),
+                can_be_agent=False),
+    EntityEntry("ورقة",   "مادة",    ("كتابة", "طباعة"),        ("تعليم",),
+                can_be_agent=False),
+    EntityEntry("طاولة",  "أثاث",    ("وضع_أشياء",),           ("بيت", "مكتب"),
+                can_be_agent=False),
+    EntityEntry("كرسي",   "أثاث",    ("جلوس",),                ("بيت", "مكتب"),
+                can_be_agent=False),
+    EntityEntry("باب",    "بنية",    ("فتح", "غلق", "عبور"),   ("بيت", "مبنى"),
+                can_be_agent=False),
+    EntityEntry("ماء",    "سائل",    ("شرب", "غسل", "سقي"),    ("طبيعة", "حياة"),
+                can_be_agent=False),
+    EntityEntry("نار",    "ظاهرة",   ("إحراق", "إضاءة"),       ("طبيعة", "خطر"),
+                can_be_agent=False),
+    EntityEntry("بيت",    "مكان",    ("سكن", "إيواء"),          ("مجتمع",),
+                can_be_agent=False),
+    EntityEntry("مدرسة",  "مكان",    ("تعليم", "دراسة"),        ("تعليم",),
+                can_be_agent=False),
+    EntityEntry("يد",     "عضو",     ("حمل", "كتابة", "لمس"),  ("جسد",),
+                can_be_agent=False),
+    EntityEntry("رجل",    "إنسان",   ("قيام", "مشي"),           ("مجتمع",),
+                can_be_agent=True,
+                possible_actions=("كتابة", "قراءة", "كلام", "ضرب", "حمل"),
+                entity_properties=("وجود", "إرادة", "قدرة", "علم", "حياة"),
+                shared_properties=("عقل", "كلام")),
+    EntityEntry("طعام",   "مادة",    ("أكل",),                  ("حياة",),
+                can_be_agent=False),
+    EntityEntry("هاتف",   "أداة",    ("تواصل", "اتصال"),        ("تواصل", "تقنية"),
+                can_be_agent=False),
+    EntityEntry("حاسوب",  "أداة",    ("كتابة", "حساب", "تواصل"), ("تقنية",),
+                can_be_agent=False),
+    EntityEntry("حجر",    "جماد",    (),                        ("طبيعة",),
+                can_be_agent=False,
+                impossible_actions=("كتابة", "خطابة", "قراءة", "كلام", "أكل"),
+                entity_properties=("وجود",),
+                shared_properties=()),
+    EntityEntry("زيد",    "إنسان",   ("قيام", "مشي", "كلام"),  ("مجتمع",),
+                can_be_agent=True,
+                possible_actions=("كتابة", "قراءة", "كلام", "ضرب", "حمل"),
+                entity_properties=("وجود", "إرادة", "قدرة", "علم", "حياة"),
+                shared_properties=("عقل", "كلام")),
+    EntityEntry("إنسان",  "إنسان",   ("قيام", "مشي", "كلام"),  ("مجتمع",),
+                can_be_agent=True,
+                possible_actions=("كتابة", "قراءة", "كلام", "ضرب", "حمل"),
+                entity_properties=("وجود", "إرادة", "قدرة", "علم", "حياة"),
+                shared_properties=("عقل", "كلام", "شجاعة")),
+    EntityEntry("طالب",   "إنسان",   ("قراءة", "دراسة", "كتابة"), ("تعليم",),
+                can_be_agent=True,
+                possible_actions=("قراءة", "كتابة", "دراسة"),
+                entity_properties=("وجود", "إرادة", "قدرة", "علم", "حياة"),
+                shared_properties=("عقل", "كلام")),
+    EntityEntry("أسد",    "حيوان",   ("صيد", "جري"),            ("طبيعة",),
+                can_be_agent=True,
+                possible_actions=("صيد", "جري", "هجوم"),
+                impossible_actions=("كتابة", "خطابة"),
+                entity_properties=("وجود", "إرادة", "قدرة", "حياة"),
+                shared_properties=("شجاعة", "قوة")),
+    EntityEntry("عصا",    "أداة",    ("ضرب",),                  ("طبيعة",),
+                can_be_agent=False,
+                entity_properties=("وجود",)),
+    EntityEntry("رسالة",  "مصنوع",   ("قراءة",),                ("تواصل",),
+                can_be_agent=False),
+    EntityEntry("خبز",    "مادة",    ("أكل",),                  ("حياة",),
+                can_be_agent=False),
 )
 
 _ENTITY_INDEX: dict[str, EntityEntry] = {e.entity: e for e in ENTITY_LEXICON}
@@ -219,11 +282,40 @@ _ENTITY_INDEX: dict[str, EntityEntry] = {e.entity: e for e in ENTITY_LEXICON}
 # 3. منطق الإثراء — Enrichment Logic
 # =========================================================
 
+# نطاق علامات التشكيل العربي (حركات + تنوين) — U+064B..U+065F, U+0670
+_ARABIC_DIACRITIC_CHARS: frozenset[str] = frozenset(
+    chr(c) for c in range(0x064B, 0x0660)
+) | {chr(0x0670)}
+
+
+def _strip_diacritics(token: str) -> str:
+    """
+    يُزيل علامات التشكيل (حركات وتنوين) من الرمز العربي مع الحفاظ على الحروف.
+
+    مثال: أسدًا → أسدا → (بعد حذف ا التنوين) أسد
+    الفرق عن NFKD: هذه الدالة لا تُحلِّل الهمزات، فتبقى "أ" كما هي.
+    """
+    # حذف الفتحة + الألف (تنوين الفتح) كوحدة واحدة: ـً + ا → لا شيء
+    result = token.replace("\u064B\u0627", "")
+    # حذف باقي علامات التشكيل
+    return "".join(ch for ch in result if ch not in _ARABIC_DIACRITIC_CHARS)
+
+
 def _strip_article(token: str) -> str:
     """إزالة أداة التعريف 'ال' من أول الكلمة إن وُجدت."""
     if token.startswith("ال") and len(token) > 2:
         return token[2:]
     return token
+
+
+def _normalize_for_lookup(token: str) -> str:
+    """
+    يُنظِّف الرمز للبحث في المعجمات:
+    يُزيل التشكيل أولًا، ثم أداة التعريف.
+    مثال: "الحجرُ" → "حجر"، "أسدًا" → "أسد"
+    """
+    bare = _strip_diacritics(token)
+    return _strip_article(bare)
 
 
 # الحروف الواحدة التي تُكتَب ملتصقة بالكلمة التالية (حروف جر/عطف بادئة)
@@ -268,11 +360,17 @@ def _enrich_token(token: str, proto_label: str) -> list[EnrichedConcept]:
 def _enrich_single(token: str, proto_label: str, is_fused_particle: bool = False) -> EnrichedConcept:
     """إثراء رمز واحد بسيط."""
     bare = _strip_article(token)
+    # نُطبِّق التطبيع الكامل (إزالة التشكيل + أداة التعريف) للبحث في المعجمات
+    normalized = _normalize_for_lookup(token)
 
     concept = EnrichedConcept(token=token, proto_label=proto_label, confidence=0.5)
 
     # 1. البحث في معجم العلاقات (الأدوات) — مهم أن يكون أولًا للحروف
-    rel_entry = _RELATION_INDEX.get(bare) or _RELATION_INDEX.get(token)
+    rel_entry = (
+        _RELATION_INDEX.get(bare)
+        or _RELATION_INDEX.get(token)
+        or _RELATION_INDEX.get(normalized)
+    )
     if rel_entry:
         concept.relation_type = rel_entry.relation_type
         concept.relation_constraint = rel_entry.constraint
@@ -281,18 +379,31 @@ def _enrich_single(token: str, proto_label: str, is_fused_particle: bool = False
         concept.confidence = 0.95
         return concept
 
-    # 2. البحث في معجم الكيانات
-    entity = _ENTITY_INDEX.get(bare) or _ENTITY_INDEX.get(token)
+    # 2. البحث في معجم الكيانات (مع تطبيع التشكيل)
+    entity = (
+        _ENTITY_INDEX.get(normalized)
+        or _ENTITY_INDEX.get(bare)
+        or _ENTITY_INDEX.get(token)
+    )
     if entity:
         concept.entity_type = entity.entity_type
         concept.affordances = list(entity.affordances)
         concept.domain = list(entity.domain)
         concept.enrichment_source = "entity_lexicon"
         concept.confidence = 0.85
+        concept.can_be_agent = entity.can_be_agent
+        concept.possible_actions = list(entity.possible_actions)
+        concept.impossible_actions = list(entity.impossible_actions)
+        concept.entity_properties = list(entity.entity_properties)
+        concept.shared_properties = list(entity.shared_properties)
         return concept
 
     # 3. البحث في معجم المشتقات
-    derived = _DERIVED_INDEX.get(bare) or _DERIVED_INDEX.get(token)
+    derived = (
+        _DERIVED_INDEX.get(normalized)
+        or _DERIVED_INDEX.get(bare)
+        or _DERIVED_INDEX.get(token)
+    )
     if derived:
         concept.derived_type = derived.derived_type
         concept.roles = [derived.role]
@@ -306,7 +417,11 @@ def _enrich_single(token: str, proto_label: str, is_fused_particle: bool = False
         return concept
 
     # 4. البحث في معجم الجذور (بواسطة التلميحات السطحية)
-    root_key = _ROOT_SURFACE_HINTS.get(bare) or _ROOT_SURFACE_HINTS.get(token)
+    root_key = (
+        _ROOT_SURFACE_HINTS.get(normalized)
+        or _ROOT_SURFACE_HINTS.get(bare)
+        or _ROOT_SURFACE_HINTS.get(token)
+    )
     if root_key:
         root_entry = _ROOT_INDEX.get(root_key)
         if root_entry:
@@ -318,7 +433,11 @@ def _enrich_single(token: str, proto_label: str, is_fused_particle: bool = False
             concept.confidence = 0.85
 
     # 5. البحث في معجم الأوزان
-    pattern_key = _PATTERN_SURFACE_HINTS.get(bare) or _PATTERN_SURFACE_HINTS.get(token)
+    pattern_key = (
+        _PATTERN_SURFACE_HINTS.get(normalized)
+        or _PATTERN_SURFACE_HINTS.get(bare)
+        or _PATTERN_SURFACE_HINTS.get(token)
+    )
     if pattern_key:
         pattern_entry = _PATTERN_INDEX.get(pattern_key)
         if pattern_entry:
@@ -405,3 +524,8 @@ def apply_lexical_enrichment_gate(state: ProofState) -> ProofState:
         },
     )
     return state
+
+
+def has_root_surface_hint(token: str) -> bool:
+    """يتحقق من وجود تلميح سطحي للجذر للرمز المحدَّد (واجهة عامة)."""
+    return token in _ROOT_SURFACE_HINTS
